@@ -1,7 +1,7 @@
 import {sleep, getColor} from './utils.js'
 import FieldEditor from './FieldEditor.js'
 
-const {PI, sin, cos, max, round, abs} = Math
+const {PI, sin, cos, max, round} = Math
 
 const WIDTH = document.documentElement.clientWidth,
   HEIGHT = document.documentElement.clientHeight,
@@ -19,7 +19,7 @@ class App {
       ['STEP', {type: Number, value: 0.05}],
       ['DRAW_SPOKES', {type: Boolean, value: false}],
       ['DRAW_UNIT_CIRCLE', {type: Boolean, value: false}],
-      ['DRAW_AXES', {type: Boolean, value: false}],
+      ['DRAW_AXES', {type: Boolean, value: true}],
 
     ]))
     this.fe.run()
@@ -106,6 +106,7 @@ class App {
     ctx.clearRect(0, 0, WIDTH, HEIGHT)
     ctx.restore()
     ctx.strokeStyle = '#666'
+    ctx.lineWidth = 2
     DRAW_AXES && this.drawAxes()
     DRAW_SPOKES && this.drawSpokes()
     DRAW_UNIT_CIRCLE && this.drawUnitCircle()
@@ -115,6 +116,7 @@ class App {
 
 void (() => {
   addEventListener('DOMContentLoaded', () => {
-    new App(document.querySelector('#canvas')).run()
+    const app = new App(document.querySelector('#canvas'))
+    app.run()
   })
 })()

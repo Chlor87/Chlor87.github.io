@@ -16,18 +16,19 @@ export default class FieldEditor extends Map {
       elem.classList.add('form-group')
       elem.append(label, input)
       label.textContent = k
-      input.value = value
-
+      
       info.append(elem)
       switch (type) {
         case Number:
           input.type = 'number'
+          input.value = value
           input.addEventListener('keyup', ({target: {value}}) => {
             super.get(k).value = type(value)
           })
           break
         case Boolean:
           input.type = 'checkbox'
+          input.checked = value
           input.addEventListener('change', ({target: {value}}) => {
             super.get(k).value = input.checked
           })
