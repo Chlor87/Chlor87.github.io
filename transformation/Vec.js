@@ -43,15 +43,15 @@ export default class Vec {
     ctx.lineTo(x, y)
     ctx.closePath()
     ctx.stroke()
-    this.arrow(x, y)
+    this.arrow(0, 0, x, y)
   }
 
-  arrow(x, y) {
+  arrow(x1, y1, x2, y2) {
     const {ctx, color} = this
     ctx.save()
     ctx.fillStyle = color
-    ctx.translate(x, y)
-    ctx.rotate(atan2(y, x))
+    ctx.translate(x2, y2)
+    ctx.rotate(atan2(y2 - y1, x2 - x1))
     ctx.beginPath()
     ctx.moveTo(0, 0)
     ctx.lineTo(-15, -10)
@@ -61,7 +61,7 @@ export default class Vec {
     ctx.restore()
   }
 
-  to({x, y}) {
+  to({x, y}, arrow) {
     const {ctx} = this
     ctx.strokeStyle = this.color
     ctx.beginPath()
@@ -69,6 +69,7 @@ export default class Vec {
     ctx.lineTo(x, y)
     ctx.closePath()
     ctx.stroke()
+    arrow && this.arrow(this.x, this.y, x, y)
   }
 
   point() {
@@ -81,6 +82,6 @@ export default class Vec {
   }
 
   lerp(vec, progress) {
-    return this.mul(1-progress).add(vec.mul(progress))
+    return this.mul(1 - progress).add(vec.mul(progress))
   }
 }

@@ -20,17 +20,10 @@ class App {
       0, -1,
       1, 0
     ).mul(2)
-
-    this.axes = {
-      x1: new Vec(-HALF_WIDTH, 0, ctx, SEC),
-      x2: new Vec(HALF_WIDTH, 0, ctx, SEC),
-      y1: new Vec(0, -HALF_HEIGHT, ctx, SEC),
-      y2: new Vec(0, HALF_HEIGHT, ctx, SEC)
-    }
   }
 
   setupDimensions() {
-    const {canvas} = this
+    const {canvas, ctx} = this
     WIDTH = document.documentElement.clientWidth
     HEIGHT = document.documentElement.clientHeight
     HALF_WIDTH = round(WIDTH / 2)
@@ -38,7 +31,12 @@ class App {
     canvas.width = canvas.style.width = WIDTH
     canvas.height = canvas.style.height = HEIGHT
     this.ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
-    this.xPath = []
+    this.axes = {
+      x1: new Vec(-HALF_WIDTH, 0, ctx, SEC),
+      x2: new Vec(HALF_WIDTH, 0, ctx, SEC),
+      y1: new Vec(0, -HALF_HEIGHT, ctx, SEC),
+      y2: new Vec(0, HALF_HEIGHT, ctx, SEC)
+    }
   }
 
   drawAxes() {
@@ -64,6 +62,7 @@ class App {
     y1.draw()
     x1.lerp(T.mul(x1), i).draw()
     y1.lerp(T.mul(y1), i).draw()
+
   }
 
   drawGrid() {
