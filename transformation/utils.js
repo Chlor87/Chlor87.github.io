@@ -1,7 +1,6 @@
 const {min, max, PI} = Math
 
-export const sleep = n => new Promise(resolve => setTimeout(resolve, n)),
-  TWO_PI = 2 * PI,
+export const TWO_PI = 2 * PI,
   HALF_PI = PI / 2,
   norm = (n, min, max) => (n - min) / (max - min),
   lerp = (n, min, max) => n * (max - min) + min,

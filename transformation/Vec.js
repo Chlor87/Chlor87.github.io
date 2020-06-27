@@ -1,4 +1,4 @@
-import {PRI, SEC} from "./style.js"
+import {SEC} from "./style.js"
 import {TWO_PI} from "./utils.js"
 
 const {PI, atan2} = Math
@@ -78,5 +78,9 @@ export default class Vec {
     ctx.arc(x, y, 2, 0, TWO_PI)
     ctx.closePath()
     ctx.fill()
+  }
+
+  lerp(vec, progress) {
+    return this.mul(1-progress).add(vec.mul(progress))
   }
 }

@@ -1,13 +1,10 @@
 import Mat from './Mat.js'
 import Vec from './Vec.js'
-import {TWO_PI, HALF_PI} from './utils.js'
+import {TWO_PI} from './utils.js'
 import {PRI, SEC} from './style.js'
-
-window.Mat = Mat
-
 const {PI, round, cos, sin, floor} = Math
 
-let UC = 100,
+let UC = 200,
   WIDTH, HEIGHT, HALF_HEIGHT, HALF_WIDTH
 
 
@@ -15,10 +12,21 @@ class App {
 
   constructor(canvas) {
     this.canvas = canvas
-    this.ctx = this.canvas.getContext('2d')
+    const ctx = this.ctx = this.canvas.getContext('2d')
     this.setupDimensions()
     this.i = 0
     this.dir = 1
+    this.T = window.T = new Mat(
+      0, -1,
+      1, 0
+    ).mul(2)
+
+    this.axes = {
+      x1: new Vec(-HALF_WIDTH, 0, ctx, SEC),
+      x2: new Vec(HALF_WIDTH, 0, ctx, SEC),
+      y1: new Vec(0, -HALF_HEIGHT, ctx, SEC),
+      y2: new Vec(0, HALF_HEIGHT, ctx, SEC)
+    }
   }
 
   setupDimensions() {
@@ -33,24 +41,8 @@ class App {
     this.xPath = []
   }
 
-  run = () => {
-    this.draw()
-  }
-
-  getTransform(i) {
-    const xTheta = i * HALF_PI
-    return new Mat(
-      cos(xTheta), -sin(xTheta),
-      sin(xTheta), cos(xTheta)
-    ).mul(2 ** i)
-  }
-
   drawAxes() {
-    const {ctx} = this,
-      x1 = new Vec(-HALF_WIDTH, 0, ctx, SEC),
-      x2 = new Vec(HALF_WIDTH, 0, ctx, SEC),
-      y1 = new Vec(0, -HALF_HEIGHT, ctx, SEC),
-      y2 = new Vec(0, HALF_HEIGHT, ctx, SEC)
+    const {axes: {x1, x2, y1, y2}} = this
     x1.to(x2)
     y1.to(y2)
   }
@@ -65,46 +57,38 @@ class App {
   }
 
   drawUnitVectors() {
-    const {ctx, i} = this,
-      T = this.getTransform(i),
-      x = new Vec(UC, 0, ctx, '#ff0000'),
-      y = new Vec(0, UC, ctx, '#00ff00')
-    ctx.lineWidth = 2
-    x.draw()
-    y.draw()
-    T.mul(x).draw()
-    T.mul(y).draw()
+    const {ctx, i, T} = this,
+      x1 = new Vec(UC, 0, ctx, '#ff0000'),
+      y1 = new Vec(0, UC, ctx, '#00ff00')
+    x1.draw()
+    y1.draw()
+    x1.lerp(T.mul(x1), i).draw()
+    y1.lerp(T.mul(y1), i).draw()
   }
 
   drawGrid() {
-    const {ctx, i} = this,
+    const {ctx, i, T} = this,
       size = floor(UC / 2),
-      T = this.getTransform(i),
-      xOffset = HALF_HEIGHT % size,
-      yOffset = HALF_WIDTH % size
-
-    for (let i = -HALF_HEIGHT + xOffset; i < HALF_HEIGHT; i += size) {
-      const main = i % 8 === 0,
+      xOffset = HEIGHT % size,
+      yOffset = WIDTH % size
+    for (let j = -HEIGHT + xOffset; j < HEIGHT + xOffset; j += size) {
+      const main = j / size % 2 === 0,
         color = main ? SEC : PRI,
-        x1 = new Vec(-WIDTH, i, ctx, color),
-        x2 = new Vec(WIDTH, i, ctx, color),
-        x3 = T.mul(x1),
-        x4 = T.mul(x2)
+        x1 = new Vec(-WIDTH, j, ctx, color),
+        x2 = new Vec(WIDTH, j, ctx, color)
       ctx.lineWidth = main ? 2 : 1
       x1.to(x2)
-      x3.to(x4)
+      x1.lerp(T.mul(x1), i).to(x2.lerp(T.mul(x2), i))
     }
 
-    for (let i = -HALF_WIDTH + yOffset; i < HALF_WIDTH; i += size) {
-      const main = i % 8 === 0,
+    for (let j = -WIDTH + yOffset; j < WIDTH; j += size) {
+      const main = j / size % 2 === 0,
         color = main ? SEC : PRI,
-        y1 = new Vec(i, -HEIGHT, ctx, color),
-        y2 = new Vec(i, HEIGHT, ctx, color),
-        y3 = T.mul(y1),
-        y4 = T.mul(y2)
+        y1 = new Vec(j, -WIDTH, ctx, color),
+        y2 = new Vec(j, WIDTH, ctx, color)
       ctx.lineWidth = main ? 2 : 1
       y1.to(y2)
-      y3.to(y4)
+      y1.lerp(T.mul(y1), i).to(y2.lerp(T.mul(y2), i))
     }
   }
 
@@ -132,7 +116,7 @@ class App {
 void (() => {
   addEventListener('DOMContentLoaded', () => {
     const app = new App(document.querySelector('#canvas'))
-    app.run()
+    app.draw()
     addEventListener('resize', () => {
       app.setupDimensions()
     }, {passive: true})
