@@ -3,9 +3,11 @@ import Vec from './Vec.js'
 import {TWO_PI, HALF_PI} from './utils.js'
 import {PRI, SEC} from './style.js'
 
+window.Mat = Mat
+
 const {PI, round, cos, sin, floor} = Math
 
-let UC = 200,
+let UC = 100,
   WIDTH, HEIGHT, HALF_HEIGHT, HALF_WIDTH
 
 
@@ -65,9 +67,9 @@ class App {
   drawUnitVectors() {
     const {ctx, i} = this,
       T = this.getTransform(i),
-      x = new Vec(UC / 4, 0, ctx, '#ff0000'),
-      y = new Vec(0, UC / 4, ctx, '#00ff00')
-    ctx.lineWidth = 3
+      x = new Vec(UC, 0, ctx, '#ff0000'),
+      y = new Vec(0, UC, ctx, '#00ff00')
+    ctx.lineWidth = 2
     x.draw()
     y.draw()
     T.mul(x).draw()
@@ -76,7 +78,7 @@ class App {
 
   drawGrid() {
     const {ctx, i} = this,
-      size = floor(UC / 4),
+      size = floor(UC / 2),
       T = this.getTransform(i),
       xOffset = HALF_HEIGHT % size,
       yOffset = HALF_WIDTH % size
@@ -105,8 +107,6 @@ class App {
       y3.to(y4)
     }
   }
-
-
 
   draw = () => {
     const {ctx, dir} = this
