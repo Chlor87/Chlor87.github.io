@@ -7,16 +7,16 @@ const {round, floor} = Math
 let UC = 200,
   WIDTH, HEIGHT, HALF_HEIGHT, HALF_WIDTH
 
-window.sampleSize = 200
+window.sampleSize = 250
 
 function* bubbleSort(arr) {
   const {length} = arr
   for (let i = 0; i < length; i++) {
     for (let j = 0; j < length; j++) {
-      if (arr[i] < arr[j]) {
-        const tmp = arr[i]
-        arr[i] = arr[j]
-        arr[j] = tmp
+      if (arr[j] > arr[j + 1]) {
+        const tmp = arr[j]
+        arr[j] = arr[j + 1]
+        arr[j + 1] = tmp
         yield [arr.slice(0), i, j]
       }
     }
@@ -24,8 +24,7 @@ function* bubbleSort(arr) {
   return
 }
 
-const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min),
-  getArray = n => Array.from({length: n}).map((_, i) => ++i),
+const getArray = n => Array.from({length: n}).map((_, i) => ++i),
   // Fisher-Yates shuffle
   shuffle = arr => {
     let len = arr.length
@@ -87,7 +86,7 @@ class App {
     for (let [next, i, j] of bubbleSort(arr.slice(0))) {
       this.clear()
       for (let [k, e] of next.entries()) {
-        const color = k === j ? '#00ff00' : k === i ? '#0000ff' : PRI,
+        const color = k === j ? '#00ff00' : k === i ? '#ff00ff' : PRI,
           x = WIDTH / sampleSize * k,
           v1 = new Vec(x, 0, 1, ctx, color),
           v2 = new Vec(x, (HEIGHT - 50) / sampleSize * e, 1, ctx, color)
