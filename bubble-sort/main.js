@@ -1,6 +1,6 @@
 import Mat from './Mat.js'
 import Vec from './Vec.js'
-import {TWO_PI} from './utils.js'
+import {TWO_PI, map} from './utils.js'
 import {PRI, SEC} from './style.js'
 
 const {round, floor} = Math
@@ -21,7 +21,7 @@ function* bubbleSort(arr) {
       }
     }
   }
-  return
+  return yield [arr, 0, length - 1]
 }
 
 const getArray = n => Array.from({length: n}).map((_, i) => ++i),
@@ -82,17 +82,18 @@ class App {
     const {ctx} = this,
       arr = shuffle(getArray(sampleSize))
 
-    ctx.lineWidth = WIDTH / sampleSize - 2
     for (let [next, i, j] of bubbleSort(arr.slice(0))) {
       this.clear()
+      ctx.lineWidth = WIDTH / sampleSize - 2
       for (let [k, e] of next.entries()) {
-        const color = k === j ? '#00ff00' : k === i ? '#ff00ff' : PRI,
-          x = WIDTH / sampleSize * k,
-          v1 = new Vec(x, 0, 1, ctx, color),
-          v2 = new Vec(x, (HEIGHT - 50) / sampleSize * e, 1, ctx, color)
-        v1.to(v2)
+        const color = (k === i || k === j) ? '#ff00ff' : PRI,
+          x = map(k, 0, sampleSize, 25, WIDTH - 25),
+          v1 = new Vec(x, 25, 1, ctx, color),
+          v2 = new Vec(x, map(e, 0, sampleSize, 25, HEIGHT - 25), 1, ctx, color)
+        requestAnimationFrame(() => v1.to(v2))
+
       }
-      await sleep(1e3/120)
+      await sleep(1)
     }
   }
 
