@@ -82,15 +82,15 @@ class App {
     const {ctx} = this,
       arr = shuffle(getArray(sampleSize))
 
-    for (let [next, i, j] of bubbleSort(arr.slice(0))) {
+    ctx.lineWidth = WIDTH / sampleSize - 3
+    for (let [next, i, j] of bubbleSort(arr)) {
       this.clear()
-      ctx.lineWidth = WIDTH / sampleSize - 2
       for (let [k, e] of next.entries()) {
         const color = (k === i || k === j) ? '#ff00ff' : PRI,
           x = map(k, 0, sampleSize, 25, WIDTH - 25),
           v1 = new Vec(x, 25, 1, ctx, color),
           v2 = new Vec(x, map(e, 0, sampleSize, 25, HEIGHT - 25), 1, ctx, color)
-        requestAnimationFrame(() => v1.to(v2))
+        v1.to(v2)
 
       }
       await sleep(1)
