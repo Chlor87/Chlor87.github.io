@@ -26,7 +26,7 @@ class App {
     canvas.width = canvas.style.width = WIDTH
     canvas.height = canvas.style.height = HEIGHT
     this.ctx = this.canvas.getContext('2d')
-    this.ctx.setTransform(1, 0, 0, -1, HALF_WIDTH + .5, HALF_HEIGHT + .5)
+    this.ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
     this.i = 0
   }
 
