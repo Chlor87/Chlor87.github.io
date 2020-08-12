@@ -1,6 +1,7 @@
-import Vec from '../common/Vec.js'
+import '../common/global.js'
+import V from '../common/V.js'
 import {PRI} from '../common/style.js'
-import {map} from '../common/utils.js'
+import {map, joinV} from '../common/utils.js'
 import Base from '../common/Base.js'
 import {getArray, shuffle, bubbleSort} from './algos.js'
 
@@ -35,9 +36,9 @@ class App extends Base {
     for (let [k, e] of arr.entries()) {
       const color = (k === i || k === j) ? '#ff00ff' : PRI,
         x = map(k, 0, sampleSize, 25 + barMargin, WIDTH - 25 - barMargin),
-        v1 = new Vec(x, 25, 1, ctx, color),
-        v2 = new Vec(x, map(e, 0, sampleSize, 25, HEIGHT - 25), 1, ctx, color)
-      v1.to(v2)
+        v1 = new V(x, 25, 1),
+        v2 = new V(x, map(e, 0, sampleSize, 25, HEIGHT - 25), 1)
+      joinV(v1, v2, ctx, color, false)
     }
   }
 

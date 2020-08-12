@@ -1,65 +1,75 @@
 import '../common/global.js'
-const inspect = Symbol.for('nodejs.util.inspect.custom')
 
-export default class Complex {
-  constructor(re, im) {
-    Object.assign(this, {re, im})
-  }
-
-  add(other) {
-    const cp = Object.create(this)
-    switch (true) {
-      case typeof other === 'number':
-        cp.re += other
+export default class Cmplx extends Float64Array {
+  constructor(...args) {
+    super(2)
+    switch (args.length) {
+      case 1:
+        this.set(args[0])
         break
-      case other instanceof Complex:
-        cp.re += other.re
-        cp.im += other.im
+      case 2:
+        this.set(args)
+        break
     }
-    return cp
   }
 
-  get mag() {
-    return hypot(this.re, this.im)
+  get r() {
+    return hypot(this[0], this[1])
   }
 
-  get dir() {
-    return (TWO_PI + atan2(this.im, this.re)) % TWO_PI
+  get θ() {
+    return atan2(this[1], this[0]) + (TWO_PI % TWO_PI)
+  }
+
+  get re() {
+    return this[0]
+  }
+
+  get im() {
+    return this[1]
   }
 
   get polar() {
-    return [this.mag, this.dir]
+    const z = new Float64Array(2)
+    z[0] = this.r
+    z[1] = this.θ
+    return z
   }
 
-  fromPolar(m, t) {
-    this.re = m * cos(t)
-    this.im = m * sin(t)
+  // in place
+  fromPolar(r, θ) {
+    this[0] = r * cos(θ)
+    this[1] = r * sin(θ)
     return this
   }
 
-  mul(other) {
-    const cp = Object.create(this)
-    switch (true) {
-      case typeof other === 'number':
-        this.re *= other
-        this.im *= other
-        break
-      case other instanceof Complex:
-        const [m1, t1] = this.polar,
-          [m2, t2] = other.polar
-        cp.fromPolar(m1 * m2, t1 + t2)
-        break
+  add(rhs) {
+    const z = new Cmplx(this)
+    if (rhs instanceof Number) {
+      z[0] += rhs
+      z[1] += rhs
+    } else {
+      z[0] += rhs[0]
+      z[1] += rhs[1]
     }
-    return cp
+    return z
+  }
+
+  mul(rhs) {
+    const z = new Cmplx(this)
+    if (rhs instanceof Number) {
+      z[0] *= rhs
+      z[1] *= rhs
+    } else {
+      const [r1, θ1] = this.polar,
+        [r2, θ2] = rhs.polar
+      z.fromPolar(r1 * r2, θ1 + θ2)
+    }
+    return z
   }
 
   pow(n) {
-    const cp = Object.create(this),
-      [m, t] = cp.polar
-    return cp.fromPolar(pow(m, n), t * n)
-  }
-
-  inspect() {
-    return 'dupa'
+    const [r, θ] = this.polar
+    return new Cmplx().fromPolar(pow(r, n), θ * n)
   }
 }
