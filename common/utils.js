@@ -21,7 +21,7 @@ export const drawV = ([x, y], ctx, color) => {
   ctx.restore()
 }
 
-export const pointV = ([x, y], ctx, color, r = 5) => {
+export const pointV = ([x, y], ctx, color, r = 3) => {
   ctx.save()
   ctx.fillStyle = color
   ctx.beginPath()
@@ -78,11 +78,12 @@ export const arc = ([x, y], a, b, r, ctx, color) => {
   ctx.restore()
 }
 
-export const text = (x, y, text, ctx, color) => {
+export const text = ([x, y], text, ctx, color) => {
   ctx.save()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.fillStyle = color
-  ctx.font = '14px sans'
+  ctx.textAlign = 'center'
+  ctx.font = '16px sans'
   ctx.fillText(text, x, -y)
   ctx.restore()
 }
