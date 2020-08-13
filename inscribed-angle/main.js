@@ -135,21 +135,22 @@ class App extends Base {
   }
 
   drawPoints = () => {
-    const {ctx, UC, O, points, T} = this,
+    const {ctx, UC, O, points, T, P} = this,
       {length} = points,
-      [a, b, c] = points
+      [a, b = P, c] = points
     let θmin, θmax, φmin, φmax
 
     if (length === 0) {
       return
     }
 
-    if (length > 0) {
+    if (a) {
       θmin = arcMeasure(O, a)
       pointV(a, ctx, RED)
+      joinV(O, a, ctx, RED)
     }
 
-    if (length > 1) {
+    if (b) {
       θmax = arcMeasure(O, b)
       pointV(b, ctx, RED)
       joinV(O, a, ctx, RED)
@@ -159,7 +160,7 @@ class App extends Base {
       this.typeAngle(O.add(25), θmax - θmin)
     }
 
-    if (length > 2) {
+    if (c) {
       φmin = arcMeasure(c, a)
       φmax = arcMeasure(c, b)
       const curr = arcMeasure(O, c),
@@ -198,8 +199,8 @@ class App extends Base {
     ctx.fillRect(0, 0, WIDTH, -HEIGHT)
     ctx.lineWidth = 2
     this.drawCircle()
-    this.drawMouse()
     this.drawPoints()
+    this.drawMouse()
   }
 }
 
