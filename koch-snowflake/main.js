@@ -19,12 +19,50 @@ class App extends Base {
     super(canvas)
     this.setupDimensions()
     this.T = new M()
+    canvas.addEventListener('mousedown', ({offsetX, offsetY}) => {
+      this.startX = offsetX
+      this.startY = offsetY
+      this.isDragging = true
+    })
+
+    canvas.addEventListener('mouseup', () => {
+      this.isDragging = false
+    })
+
+    canvas.addEventListener('mousemove', this.handleMouseMove, {passive: true})
+
+    canvas.addEventListener('wheel', ({offsetX, offsetY, deltaY}) => {
+      const {HALF_WIDTH, HALF_HEIGHT} = this,
+        s = deltaY < 0 ? 1.1 : 0.9,
+        dx = (offsetX - HALF_WIDTH) * s,
+        dy = -(offsetY - HALF_HEIGHT) * s
+      this.scale *= s
+      if (this.scale < 0.1 || this.scale > 100) {
+        this.scale /= s
+        return
+      }
+      this.T = this.T.translate(-dx, -dy).scale(s, s).translate(dx, dy)
+      requestAnimationFrame(this.draw)
+    }, {passive: true})
   }
 
   setupDimensions() {
     super.setupDimensions()
     const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
     ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
+  }
+
+  handleMouseMove = ({offsetX, offsetY}) => {
+    if (!this.isDragging) {
+      return
+    }
+    const {startX, startY} = this,
+      dx = offsetX - startX,
+      dy = -(offsetY - startY)
+    this.startX = offsetX
+    this.startY = offsetY
+    this.T = this.T.translate(dx, dy)
+    requestAnimationFrame(this.draw)
   }
 
   drawAxes = () => {
@@ -38,7 +76,7 @@ class App extends Base {
   }
 
   kochCurve = (start, end, max = 4, depth = 0) => {
-    const {ctx} = this,
+    const {ctx, T} = this,
       theta = arcMeasure(start, end),
       mag = magV(start, end) / 3,
       a = start,
@@ -66,21 +104,17 @@ class App extends Base {
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, dir} = this
+    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, scale, T} = this
     ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
     const v = new V(max(HALF_WIDTH, HALF_HEIGHT) / 3, 0, 1),
-      a = new M().rotate(PI / 2).mul(v),
-      b = new M().rotate(PI / 2 + (PI * 2) / 3).mul(v),
-      c = new M().rotate(PI / 2 + (PI * 4) / 3).mul(v)
+      a = T.mul(new M().rotate(PI / 2).mul(v)),
+      b = T.mul(new M().rotate(PI / 2 + (PI * 2) / 3).mul(v)),
+      c = T.mul(new M().rotate(PI / 2 + (PI * 4) / 3).mul(v)),
+      s = floor(log2(scale))
 
-    this.i += 0.05 * this.dir
-    if (this.i >= 5.49 || this.i < 0) {
-      this.dir *= -1
-    }
-    this.kochCurve(b, a, floor(this.i))
-    this.kochCurve(c, b, floor(this.i))
-    this.kochCurve(a, c, floor(this.i))
-    requestAnimationFrame(this.draw)
+    this.kochCurve(b, a, s)
+    this.kochCurve(c, b, s)
+    this.kochCurve(a, c, s)
   }
 }
 

@@ -89,5 +89,3 @@ export default class Cmplx extends Float64Array {
     return new Cmplx().fromPolar(pow(r, n), θ * n)
   }
 }
-
-console.log(new Cmplx(2, 2).div(new Cmplx(2, 2)))
