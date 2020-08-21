@@ -1,10 +1,9 @@
 import '../common/global.js'
-import Cmplx from '../common/Complex.js'
+import Cmplx from '../common/Cmplx.js'
 import {PRI, SEC} from '../common/style.js'
 import Base from '../common/Base.js'
-import {map, joinV, drawV} from '../common/utils.js'
+import {map, joinV, pointV} from '../common/utils.js'
 import V from '../common/V.js'
-import M from '../common/M.js'
 
 class App extends Base {
   mX = 0
@@ -45,13 +44,12 @@ class App extends Base {
   }
 
   drawComplex() {
-    const {ctx, mX, mY, HALF_WIDTH, HALF_HEIGHT, UC} = this
+    const {ctx, mX, mY, HALF_WIDTH, HALF_HEIGHT} = this
     let Z = new Cmplx(mX, mY),
       C = new Cmplx(mX, mY),
       prev
     ctx.fillStyle = PRI
     ctx.strokeStyle = PRI
-
     for (let i = 0; i < 100; i++) {
       prev = new Cmplx(Z)
       Z = Z.pow(2).add(C)
@@ -62,16 +60,11 @@ class App extends Base {
         prevX = map(prev[0], -2, 2, -HALF_WIDTH, HALF_WIDTH),
         prevY = map(prev[1], -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
         x = map(re, -2, 2, -HALF_WIDTH, HALF_WIDTH),
-        y = map(im, -2, 2, HALF_HEIGHT, -HALF_HEIGHT)
-      ctx.beginPath()
-      ctx.arc(x, y, 3, 0, TWO_PI)
-      ctx.closePath()
-      ctx.fill()
-      ctx.beginPath()
-      ctx.moveTo(prevX, prevY)
-      ctx.lineTo(x, y)
-      ctx.closePath()
-      ctx.stroke()
+        y = map(im, -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
+        v1 = new V(prevX, prevY, 1),
+        v2 = new V(x, y, 1)
+      pointV(v1, ctx, PRI)
+      joinV(v1, v2, ctx, PRI)
     }
   }
 

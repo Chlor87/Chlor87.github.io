@@ -68,6 +68,8 @@ export const joinV = ([x1, y1], [x2, y2], ctx, color, arrow = false) => {
   ctx.restore()
 }
 
+export const magV = ([x1, y1], [x2, y2]) => hypot(x2 - x1, y2 - y1)
+
 export const arc = ([x, y], a, b, r, ctx, color) => {
   ctx.save()
   ctx.lineWidth = 2

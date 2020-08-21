@@ -1,4 +1,5 @@
-import '../common/global.js'
+import './global.js'
+import {normalizeAngle} from './utils.js'
 
 export default class Cmplx extends Float64Array {
   constructor(...args) {
@@ -18,7 +19,7 @@ export default class Cmplx extends Float64Array {
   }
 
   get θ() {
-    return atan2(this[1], this[0]) + (TWO_PI % TWO_PI)
+    return normalizeAngle(atan2(this[1], this[0]))
   }
 
   get re() {
@@ -45,7 +46,7 @@ export default class Cmplx extends Float64Array {
 
   add(rhs) {
     const z = new Cmplx(this)
-    if (rhs instanceof Number) {
+    if (typeof rhs === 'number') {
       z[0] += rhs
       z[1] += rhs
     } else {
@@ -57,7 +58,7 @@ export default class Cmplx extends Float64Array {
 
   mul(rhs) {
     const z = new Cmplx(this)
-    if (rhs instanceof Number) {
+    if (typeof rhs === 'number') {
       z[0] *= rhs
       z[1] *= rhs
     } else {
@@ -68,8 +69,25 @@ export default class Cmplx extends Float64Array {
     return z
   }
 
+  div(rhs) {
+    const z = new Cmplx(this)
+    if (typeof rhs === 'number') {
+      z[0] /= rhs
+      z[1] /= rhs
+    } else {
+      const [a, bi] = z,
+        [c, di] = rhs,
+        div = c ** 2 + di ** 2
+      z[0] = (a * c + bi * di) / div
+      z[1] = (-(a * di) + bi * c) / div
+    }
+    return z
+  }
+
   pow(n) {
     const [r, θ] = this.polar
     return new Cmplx().fromPolar(pow(r, n), θ * n)
   }
 }
+
+console.log(new Cmplx(2, 2).div(new Cmplx(2, 2)))

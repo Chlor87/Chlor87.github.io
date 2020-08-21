@@ -35,6 +35,17 @@ export default class V extends Float32Array {
     return v
   }
 
+  div(rhs) {
+    const v = new V(this)
+    if (rhs instanceof Float32Array) {
+      throw new Error('not implemented')
+    } else {
+      v[0] /= rhs
+      v[1] /= rhs
+    }
+    return v
+  }
+
   lerp(rhs, i) {
     return this.mul(1 - i).add(rhs.mul(i))
   }
