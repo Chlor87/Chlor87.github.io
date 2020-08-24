@@ -14,6 +14,7 @@ class App extends Base {
   scale = 1
   i = 0
   dir = 1
+  max = 0
 
   constructor(canvas) {
     super(canvas)
@@ -31,25 +32,30 @@ class App extends Base {
 
     canvas.addEventListener('mousemove', this.handleMouseMove, {passive: true})
 
-    canvas.addEventListener('wheel', ({offsetX, offsetY, deltaY}) => {
-      const {HALF_WIDTH, HALF_HEIGHT} = this,
-        s = deltaY < 0 ? 1.1 : 0.9,
-        dx = (offsetX - HALF_WIDTH) * s,
-        dy = -(offsetY - HALF_HEIGHT) * s
-      this.scale *= s
-      if (this.scale < 0.1 || this.scale > 100) {
-        this.scale /= s
-        return
-      }
-      this.T = this.T.translate(-dx, -dy).scale(s, s).translate(dx, dy)
-      requestAnimationFrame(this.draw)
-    }, {passive: true})
+    canvas.addEventListener(
+      'wheel',
+      ({offsetX, offsetY, deltaY}) => {
+        const {HALF_WIDTH, HALF_HEIGHT} = this,
+          s = deltaY < 0 ? 1.1 : 0.9,
+          dx = (offsetX - HALF_WIDTH) * s,
+          dy = -(offsetY - HALF_HEIGHT) * s
+        this.scale *= s
+        if (this.scale < 0.1 || this.scale > 1000) {
+          this.scale /= s
+          return
+        }
+        this.T = this.T.translate(-dx, -dy).scale(s, s).translate(dx, dy)
+        requestAnimationFrame(this.draw)
+      },
+      {passive: true}
+    )
   }
 
   setupDimensions() {
     super.setupDimensions()
     const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
     ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
+    this.max = hypot(HALF_WIDTH, HALF_HEIGHT)
   }
 
   handleMouseMove = ({offsetX, offsetY}) => {
@@ -76,16 +82,18 @@ class App extends Base {
   }
 
   kochCurve = (start, end, max = 4, depth = 0) => {
+    if (this.test(start, end)) {
+      return
+    }
     const {ctx, T} = this,
       theta = arcMeasure(start, end),
       mag = magV(start, end) / 3,
       a = start,
       b = start.lerp(end, 1 / 3),
       c = new M()
-        .translate(mag, 0)
         .rotate(theta + PI / 3)
         .translate(b[0], b[1])
-        .mul(new V(1, 0, 1)),
+        .mul(new V(mag, 0, 1)),
       d = start.lerp(end, 2 / 3),
       e = end
 
@@ -101,6 +109,15 @@ class App extends Base {
     this.kochCurve(b, c, max, depth + 1)
     this.kochCurve(c, d, max, depth + 1)
     this.kochCurve(d, e, max, depth + 1)
+  }
+
+  test = (a, b) => {
+    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this,
+      [x1, x2] = a[0] > b[0] ? [b[0], a[0]] : [a[0], b[0]],
+      [y1, y2] = a[1] > b[1] ? [b[1], a[1]] : [a[1], b[1]],
+      hw = HALF_WIDTH * 2,
+      hh = HALF_HEIGHT * 2
+    return !(x1 < hw && x2 > -hw && y1 < hh && y2 > -hh)
   }
 
   draw = ts => {

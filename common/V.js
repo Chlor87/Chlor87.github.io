@@ -49,4 +49,8 @@ export default class V extends Float32Array {
   lerp(rhs, i) {
     return this.mul(1 - i).add(rhs.mul(i))
   }
+
+  get mag() {
+    return hypot(this[0], this[1])
+  }
 }
