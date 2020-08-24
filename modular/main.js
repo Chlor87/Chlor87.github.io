@@ -97,6 +97,14 @@ class App extends Base {
       pointV(src, ctx, PRI, 2)
       joinV(src, dst, ctx, PRI)
     }
+
+    ctx.save()
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.fillStyle = PRI
+    ctx.textAlign = 'center'
+    ctx.font = '24px sans'
+    ctx.fillText(this.step.toFixed(3), this.WIDTH * 0.9, this.HEIGHT * 0.1)
+    ctx.restore()
   }
 
   draw = ts => {
@@ -106,7 +114,7 @@ class App extends Base {
     this.drawPoints()
     if (run) {
       this.step += 0.01 * this.dir
-      if (this.step > this.maxStep || this.step <= 0) {
+      if (this.step >= this.maxStep || this.step <= 0) {
         this.dir *= -1
       }
       requestAnimationFrame(this.draw)
