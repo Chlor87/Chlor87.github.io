@@ -63,6 +63,7 @@ class App extends Base {
     switch (key) {
       case ' ':
         this.run = !this.run
+        requestAnimationFrame(this.draw)
         break
       case 'ArrowLeft':
         this.step -= ctrlKey ? 0.001 : shiftKey ? 0.1 : 0.01
@@ -73,7 +74,7 @@ class App extends Base {
       default:
         return
     }
-    requestAnimationFrame(this.draw)
+    !this.run && requestAnimationFrame(this.draw)
   }
 
   drawUC = () => {
