@@ -1,3 +1,7 @@
+/**
+ * inspired by Mathologer
+ */
+
 import '../common/global.js'
 import {SEC, PRI} from '../common/style.js'
 import Base from '../common/Base.js'

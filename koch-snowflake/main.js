@@ -1,10 +1,9 @@
 import '../common/global.js'
-import {PRI, SEC, RED, GREEN} from '../common/style.js'
+import {PRI, SEC} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
-import {joinV, pointV, arcMeasure, drawV} from '../common/utils.js'
-import Cmplx from '../common/Cmplx.js'
+import {joinV, arcMeasure} from '../common/utils.js'
 
 class App extends Base {
   UC = 50

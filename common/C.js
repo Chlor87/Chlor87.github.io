@@ -1,7 +1,7 @@
 import './global.js'
 import {normalizeAngle} from './utils.js'
 
-export default class Cmplx extends Float64Array {
+export default class C extends Float32Array {
   constructor(...args) {
     super(2)
     switch (args.length) {
@@ -31,7 +31,7 @@ export default class Cmplx extends Float64Array {
   }
 
   get polar() {
-    const z = new Float64Array(2)
+    const z = new Float32Array(2)
     z[0] = this.r
     z[1] = this.θ
     return z
@@ -45,7 +45,7 @@ export default class Cmplx extends Float64Array {
   }
 
   add(rhs) {
-    const z = new Cmplx(this)
+    const z = new C(this)
     if (typeof rhs === 'number') {
       z[0] += rhs
       z[1] += rhs
@@ -57,7 +57,7 @@ export default class Cmplx extends Float64Array {
   }
 
   mul(rhs) {
-    const z = new Cmplx(this)
+    const z = new C(this)
     if (typeof rhs === 'number') {
       z[0] *= rhs
       z[1] *= rhs
@@ -70,7 +70,7 @@ export default class Cmplx extends Float64Array {
   }
 
   div(rhs) {
-    const z = new Cmplx(this)
+    const z = new C(this)
     if (typeof rhs === 'number') {
       z[0] /= rhs
       z[1] /= rhs
@@ -86,6 +86,13 @@ export default class Cmplx extends Float64Array {
 
   pow(n) {
     const [r, θ] = this.polar
-    return new Cmplx().fromPolar(pow(r, n), θ * n)
+    return new C().fromPolar(pow(r, n), θ * n)
+  }
+
+  rot(θ) {
+    const cp = new C(this),
+    {r, θ: srcθ} = cp
+    cp.fromPolar(r, θ + srcθ)
+    return cp
   }
 }

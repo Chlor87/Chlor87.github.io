@@ -1,5 +1,5 @@
 import '../common/global.js'
-import Cmplx from '../common/Cmplx.js'
+import C from '../common/C.js'
 import {PRI, SEC} from '../common/style.js'
 import Base from '../common/Base.js'
 import {map, joinV, pointV} from '../common/utils.js'
@@ -45,18 +45,18 @@ class App extends Base {
 
   drawComplex() {
     const {ctx, mX, mY, HALF_WIDTH, HALF_HEIGHT} = this
-    let Z = new Cmplx(mX, mY),
-      C = new Cmplx(mX, mY),
+    let z = new C(mX, mY),
+      c = new C(mX, mY),
       prev
     ctx.fillStyle = PRI
     ctx.strokeStyle = PRI
     for (let i = 0; i < 100; i++) {
-      prev = new Cmplx(Z)
-      Z = Z.pow(2).add(C)
-      if (Z.r > 2) {
+      prev = new C(z)
+      z = z.pow(2).add(c)
+      if (z.r > 2) {
         break
       }
-      const [re, im] = Z,
+      const [re, im] = z,
         prevX = map(prev[0], -2, 2, -HALF_WIDTH, HALF_WIDTH),
         prevY = map(prev[1], -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
         x = map(re, -2, 2, -HALF_WIDTH, HALF_WIDTH),
