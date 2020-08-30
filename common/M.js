@@ -1,14 +1,13 @@
 import './global.js'
 import V from './V.js'
 
-const I = new Float32Array(9)
+const I = new Float32Array(6)
 I[0] = 1
 I[4] = 1
-I[8] = 1
 
 export default class M extends Float32Array {
   constructor(...args) {
-    super(9)
+    super(6)
     switch (args.length) {
       case 0:
         this.set(I)
@@ -16,7 +15,7 @@ export default class M extends Float32Array {
       case 1:
         this.set(args[0])
         break
-      case 9:
+      case 6:
         this.set(args)
         break
     }
@@ -28,22 +27,28 @@ export default class M extends Float32Array {
   }
 
   addScalar(rhs) {
-    for (let i = 0; i < this.length; i++) {
-      this[i] += rhs
-    }
+    this[0] += rhs
+    this[1] += rhs
+    this[2] += rhs
+    this[3] += rhs
+    this[4] += rhs
+    this[5] += rhs
     return this
   }
 
   addMatrix(rhs) {
-    for (let i = 0; i < this.length; i++) {
-      this[i] = rhs[i]
-    }
+    this[0] += rhs[0]
+    this[1] += rhs[1]
+    this[2] += rhs[2]
+    this[3] += rhs[3]
+    this[4] += rhs[4]
+    this[5] += rhs[5]
     return this
   }
 
   mul(rhs) {
     const m = new M(this)
-    if (rhs instanceof Number) {
+    if (typeof rhs === 'number') {
       return m.mulScalar(rhs)
     } else if (rhs instanceof V) {
       return m.mulVec(rhs)
@@ -53,9 +58,12 @@ export default class M extends Float32Array {
   }
 
   mulScalar(rhs) {
-    for (let i = 0; i < this.length; i++) {
-      this[i] *= rhs
-    }
+    this[0] *= rhs
+    this[1] *= rhs
+    this[2] *= rhs
+    this[3] *= rhs
+    this[4] *= rhs
+    this[5] *= rhs
     return this
   }
 
@@ -64,17 +72,14 @@ export default class M extends Float32Array {
     const [
       a, b, c,
       d, e, f,
-      g, h, i
     ] = this,
     [
       x,
       y,
-      z
     ] = rhs
     return new V(
-      a * x + b * y + c * z,
-      d * x + e * y + f * z,
-      g * x + h * y + i * z
+      a * x + b * y + c,
+      d * x + e * y + f
     )
   }
 
@@ -83,25 +88,19 @@ export default class M extends Float32Array {
     const [
       aa, ab, ac,
       ad, ae, af,
-      ag, ah, ai
     ] = this,
     [
       ba, bb, bc,
       bd, be, bf,
-      bg, bh, bi
     ] = rhs
 
-    this[0] = aa * ba + ab * bd + ac * bg
-    this[1] = aa * bb + ab * be + ac * bh
-    this[2] = aa * bc + ab * bf + ac * bi
+    this[0] = aa * ba + ab * bd
+    this[1] = aa * bb + ab * be
+    this[2] = aa * bc + ab * bf + ac
 
-    this[3] = ad * ba + ae * bd + af * bg
-    this[4] = ad * bb + ae * be + af * bh
-    this[5] = ad * bc + ae * bf + af * bi
-
-    this[6] = ag * ba + ah * bd + ai * bg
-    this[7] = ag * bb + ah * be + ai * bh
-    this[8] = ag * bc + ah * bf + ai * bi
+    this[3] = ad * ba + ae * bd
+    this[4] = ad * bb + ae * be
+    this[5] = ad * bc + ae * bf + af
 
     return this
   }

@@ -2,7 +2,7 @@ const {min, max, PI} = Math
 import V from './V.js'
 import M from './M.js'
 
-export const TWO_PI = 2 * PI,
+export const TAU = 2 * PI,
   HALF_PI = PI / 2,
   norm = (n, min, max) => (n - min) / (max - min),
   lerp = (n, min, max) => n * (max - min) + min,
@@ -17,7 +17,7 @@ export const drawV = ([x, y], ctx, color) => {
   ctx.lineTo(x, y)
   ctx.closePath()
   ctx.stroke()
-  drawArrow(0, 0, x, y, ctx, color)
+  // drawArrow(0, 0, x, y, ctx, color)
   ctx.restore()
 }
 
@@ -25,14 +25,14 @@ export const pointV = ([x, y], ctx, color, r = 3) => {
   ctx.save()
   ctx.fillStyle = color
   ctx.beginPath()
-  ctx.arc(x, y, r, 0, TWO_PI)
+  ctx.arc(x, y, r, 0, TAU)
   ctx.closePath()
   ctx.fill()
   ctx.restore()
 }
 
 const drawArrow = (x1, y1, x2, y2, ctx, color) => {
-  const triangle = [new V(0, 0, 1), new V(-12, 8, 1), new V(-12, -8, 1)],
+  const triangle = [new V(0, 0), new V(-12, 8), new V(-12, -8)],
     θ = normalizeAngle(atan2(y2 - y1, x2 - x1)),
     T = new M().rotate(θ).translate(x2, y2)
   triangle.push(triangle[0])
@@ -48,7 +48,7 @@ const drawArrow = (x1, y1, x2, y2, ctx, color) => {
   ctx.fill()
 }
 
-export const normalizeAngle = a => (a + TWO_PI) % TWO_PI
+export const normalizeAngle = a => (a + TAU) % TAU
 
 export const arcMeasure = ([ox, oy], [x, y]) => {
   const dx = x - ox,

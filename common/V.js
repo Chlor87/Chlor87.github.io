@@ -1,11 +1,11 @@
 export default class V extends Float32Array {
   constructor(...args) {
-    super(3)
+    super(2)
     switch (args.length) {
       case 1:
         this.set(args[0])
         break
-      case 3:
+      case 2:
         this.set(args)
         break
     }
@@ -23,26 +23,29 @@ export default class V extends Float32Array {
     return v
   }
 
-  mul(rhs) {
+  sub(rhs) {
     const v = new V(this)
     if (rhs instanceof Float32Array) {
-      v[0] *= rhs[0]
-      v[1] *= rhs[1]
+      v[0] -= rhs[0]
+      v[1] -= rhs[1]
     } else {
-      v[0] *= rhs
-      v[1] *= rhs
+      v[0] -= rhs
+      v[1] -= rhs
     }
     return v
   }
 
-  div(rhs) {
+  mul(scalar) {
     const v = new V(this)
-    if (rhs instanceof Float32Array) {
-      throw new Error('not implemented')
-    } else {
-      v[0] /= rhs
-      v[1] /= rhs
-    }
+    v[0] *= scalar
+    v[1] *= scalar
+    return v
+  }
+
+  div(scalar) {
+    const v = new V(this)
+    v[0] /= scalar
+    v[1] /= scalar
     return v
   }
 

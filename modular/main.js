@@ -3,11 +3,10 @@
  */
 
 import '../common/global.js'
-import {SEC, PRI} from '../common/style.js'
+import {PRI} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
-import M from '../common/M.js'
-import {joinV, pointV, drawV} from '../common/utils.js'
+import {joinV, pointV} from '../common/utils.js'
 
 class App extends Base {
   UC = 100
@@ -31,6 +30,7 @@ class App extends Base {
     canvas.addEventListener('mouseleave', this.handleMouseUp)
     canvas.addEventListener('mousemove', this.handleMouseMove)
     window.addEventListener('keydown', this.handleKeyPress)
+    this.setupControls()
   }
 
   setupDimensions() {
@@ -81,13 +81,41 @@ class App extends Base {
     !this.run && requestAnimationFrame(this.draw)
   }
 
+  setupControls = () => {
+    const {maxStep, step, maxPoints} = this,
+      $step = (this.$step = document.querySelector('#step')),
+      $stepValue = (this.$stepValue = document.querySelector('#step-value')),
+      $numPoints = this.$numPoints = document.querySelector('#num-points')
+    $step.min = 0
+    $step.max = maxStep
+    $step.step = 0.001
+    $step.value = step
+    $stepValue.textContent = step.toFixed(3)
+
+    $numPoints.min = 1
+    $numPoints.max = maxPoints
+    $numPoints.step = 1
+    $numPoints.value = $numPoints.dataset.value = this.numPoints
+
+    $step.addEventListener('input', ({target: {value}}) => {
+      this.step = Number(value)
+      !this.run && requestAnimationFrame(this.draw)
+    })
+
+    $numPoints.addEventListener('input', ({target: {value}}) => {
+      this.numPoints = Number(value)
+      $numPoints.dataset.value = value
+      !this.run && requestAnimationFrame(this.draw)
+    })
+  }
+
   drawUC = () => {
     const {ctx, UC} = this
     pointV(new V(0, 0), ctx, PRI)
     ctx.save()
     ctx.strokeStyle = PRI
     ctx.beginPath()
-    ctx.arc(0, 0, UC, 0, TWO_PI)
+    ctx.arc(0, 0, UC, 0, TAU)
     ctx.stroke()
     ctx.restore()
   }
@@ -95,10 +123,10 @@ class App extends Base {
   drawPoints = () => {
     const {ctx, UC, step, numPoints} = this
     for (let i = 0; i < numPoints; i++) {
-      const srcTheta = (TWO_PI / numPoints) * i,
-        dstTheta = (((i * step) % numPoints) / numPoints) * TWO_PI,
-        src = new V(UC * cos(srcTheta), UC * sin(srcTheta), 1),
-        dst = new V(UC * cos(dstTheta), UC * sin(dstTheta), 1)
+      const srcTheta = (TAU / numPoints) * i,
+        dstTheta = (((i * step) % numPoints) / numPoints) * TAU,
+        src = new V(UC * cos(srcTheta), UC * sin(srcTheta)),
+        dst = new V(UC * cos(dstTheta), UC * sin(dstTheta))
       pointV(src, ctx, PRI, 2)
       joinV(src, dst, ctx, PRI)
     }
@@ -108,7 +136,6 @@ class App extends Base {
     ctx.fillStyle = PRI
     ctx.textAlign = 'center'
     ctx.font = '24px sans'
-    ctx.fillText(this.step.toFixed(3), this.WIDTH * 0.9, this.HEIGHT * 0.1)
     ctx.restore()
   }
 
@@ -124,6 +151,8 @@ class App extends Base {
       }
       requestAnimationFrame(this.draw)
     }
+    this.$step.value = this.step
+    this.$stepValue.textContent = this.step.toFixed(3)
   }
 }
 

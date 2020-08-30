@@ -3,16 +3,7 @@ import {PRI, SEC, RED, GREEN} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
-import {norm, drawV, joinV, clamp} from '../common/utils.js'
-
-const text = (t, x, y, ctx) => {
-  ctx.save()
-  ctx.scale(1, -1)
-  ctx.fillStyle = '#fff'
-  ctx.font = '18px sans-serif'
-  ctx.fillText(t, x, -y)
-  ctx.restore()
-}
+import {norm, drawV, joinV, clamp, pointV} from '../common/utils.js'
 
 class App extends Base {
   UC = 50
@@ -28,7 +19,7 @@ class App extends Base {
 
     const {HALF_WIDTH, HALF_HEIGHT} = this
 
-    this.T = new M().rotate(PI/4, PI/4).translate(HALF_WIDTH, HALF_HEIGHT)
+    this.T = new M().rotate(PI / 4, PI / 4).translate(HALF_WIDTH, HALF_HEIGHT)
 
     canvas.addEventListener('mousedown', ({offsetX, offsetY}) => {
       this.startX = offsetX
@@ -75,10 +66,10 @@ class App extends Base {
       size = 25,
       space = 100,
       square = [
-        new V(size, size, 1),
-        new V(-size, size, 1),
-        new V(-size, -size, 1),
-        new V(size, -size, 1)
+        new V(size, size),
+        new V(-size, size),
+        new V(-size, -size),
+        new V(size, -size)
       ],
       ne = [space, space],
       nw = [-space, space],
@@ -96,10 +87,10 @@ class App extends Base {
 
   drawAxes = () => {
     const {ctx, WIDTH, HALF_WIDTH, HEIGHT, HALF_HEIGHT, T} = this,
-      x1 = new V(-HALF_WIDTH, 0, 1),
-      x2 = new V(HALF_WIDTH, 0, 1),
-      y1 = new V(0, HALF_HEIGHT, 1),
-      y2 = new V(0, -HALF_HEIGHT, 1),
+      x1 = new V(-HALF_WIDTH, 0),
+      x2 = new V(HALF_WIDTH, 0),
+      y1 = new V(0, HALF_HEIGHT),
+      y2 = new V(0, -HALF_HEIGHT),
       tx = new M().translate(HALF_WIDTH, T[5]),
       ty = new M().translate(T[2], HALF_HEIGHT),
       c = new M().translate(HALF_WIDTH, HALF_HEIGHT)

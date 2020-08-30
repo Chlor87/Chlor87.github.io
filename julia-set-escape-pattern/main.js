@@ -27,10 +27,10 @@ class App extends Base {
     const {HALF_WIDTH, HALF_HEIGHT, ctx} = this
     ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
     this.axes = {
-      x1: new V(-HALF_WIDTH, 0, 1),
-      x2: new V(HALF_WIDTH, 0, 1),
-      y1: new V(0, -HALF_HEIGHT, 1),
-      y2: new V(0, HALF_HEIGHT, 1)
+      x1: new V(-HALF_WIDTH, 0),
+      x2: new V(HALF_WIDTH, 0),
+      y1: new V(0, -HALF_HEIGHT),
+      y2: new V(0, HALF_HEIGHT)
     }
   }
 
@@ -61,8 +61,8 @@ class App extends Base {
         prevY = map(prev[1], -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
         x = map(re, -2, 2, -HALF_WIDTH, HALF_WIDTH),
         y = map(im, -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
-        v1 = new V(prevX, prevY, 1),
-        v2 = new V(x, y, 1)
+        v1 = new V(prevX, prevY),
+        v2 = new V(x, y)
       pointV(v1, ctx, PRI)
       joinV(v1, v2, ctx, PRI)
     }

@@ -7,7 +7,7 @@ const WIDTH = document.documentElement.clientWidth,
   HEIGHT = document.documentElement.clientHeight,
   HALF_WIDTH = round(WIDTH / 2),
   HALF_HEIGHT = round(HEIGHT / 2),
-  TWO_PI = 2 * PI
+  TAU = 2 * PI
 
 class App {
 
@@ -52,7 +52,7 @@ class App {
     const {ctx, fe} = this,
       UC = fe.get('UC')
     ctx.beginPath()
-    ctx.arc(0, 0, UC, 0, TWO_PI)
+    ctx.arc(0, 0, UC, 0, TAU)
     ctx.closePath()
     ctx.stroke()
   }
@@ -62,17 +62,17 @@ class App {
       UC = fe.get('UC'),
       SPOKES = fe.get('SPOKES'),
       STEP = fe.get('STEP')
-    this.i = max(this.i + STEP, TWO_PI)
+    this.i = max(this.i + STEP, TAU)
     for (let i = 1; i <= SPOKES; i++) {
       const radialOffset = PI / SPOKES * i,
         x = cos(this.i + radialOffset) * UC,
-        theta = TWO_PI / SPOKES * i
+        theta = TAU / SPOKES * i
 
       ctx.save()
       ctx.fillStyle = getColor(theta)
       ctx.rotate(radialOffset)
       ctx.beginPath()
-      ctx.arc(x, 0, 10, 0, TWO_PI)
+      ctx.arc(x, 0, 10, 0, TAU)
       ctx.closePath()
       ctx.fill()
       ctx.restore()

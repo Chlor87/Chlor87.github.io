@@ -1,12 +1,11 @@
 import '../common/global.js'
-import {PRI, SEC} from '../common/style.js'
+import {PRI, SEC, RED, GREEN} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
-import {joinV, arcMeasure} from '../common/utils.js'
+import {joinV, arcMeasure, drawV, pointV} from '../common/utils.js'
 
 class App extends Base {
-  UC = 50
   startX = 0
   startY = 0
   isDragging = false
@@ -55,6 +54,7 @@ class App extends Base {
     const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
     ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
     this.max = hypot(HALF_WIDTH, HALF_HEIGHT)
+    this.UC = 0.4 * this.max
   }
 
   handleMouseMove = ({offsetX, offsetY}) => {
@@ -70,67 +70,53 @@ class App extends Base {
     requestAnimationFrame(this.draw)
   }
 
-  drawAxes = () => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this,
-      x1 = new V(-HALF_WIDTH, 0),
-      x2 = new V(HALF_WIDTH, 0),
-      y1 = new V(0, -HALF_HEIGHT),
-      y2 = new V(0, HALF_HEIGHT)
-    joinV(x1, x2, ctx, SEC)
-    joinV(y1, y2, ctx, SEC)
-  }
+  drawSierpinski = (v1, v2, v3, i = 0) => {
+    const {ctx} = this,
+      v1v2 = v1.lerp(v2, 0.5),
+      v2v3 = v2.lerp(v3, 0.5),
+      v3v1 = v3.lerp(v1, 0.5),
+      [x1, y1] = v1,
+      [x2, y2] = v2,
+      [x3, y3] = v3,
+      [x4, y4] = v1v2,
+      [x5, y5] = v2v3,
+      [x6, y6] = v3v1
 
-  kochCurve = (start, end, max = 4, depth = 0) => {
-    if (this.test(start, end)) {
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.lineTo(x3, y3)
+    ctx.lineTo(x1, y1)
+    ctx.moveTo(x4, y4)
+    ctx.lineTo(x5, y5)
+    ctx.lineTo(x6, y6)
+    ctx.lineTo(x4, y4)
+    ctx.stroke()
+
+    if (i > log(this.scale ** 2)) {
       return
     }
-    const {ctx, T} = this,
-      theta = arcMeasure(start, end),
-      mag = magV(start, end) / 3,
-      a = start,
-      b = start.lerp(end, 1 / 3),
-      c = new M()
-        .rotate(theta + PI / 3)
-        .translate(b[0], b[1])
-        .mul(new V(mag, 0)),
-      d = start.lerp(end, 2 / 3),
-      e = end
+    i++
 
-    if (depth >= max) {
-      joinV(a, b, ctx, PRI)
-      joinV(b, c, ctx, PRI)
-      joinV(c, d, ctx, PRI)
-      joinV(d, e, ctx, PRI)
-      return
-    }
-
-    this.kochCurve(a, b, max, depth + 1)
-    this.kochCurve(b, c, max, depth + 1)
-    this.kochCurve(c, d, max, depth + 1)
-    this.kochCurve(d, e, max, depth + 1)
-  }
-
-  test = (a, b) => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this,
-      [x1, x2] = a[0] > b[0] ? [b[0], a[0]] : [a[0], b[0]],
-      [y1, y2] = a[1] > b[1] ? [b[1], a[1]] : [a[1], b[1]],
-      hw = HALF_WIDTH * 2,
-      hh = HALF_HEIGHT * 2
-    return !(x1 < hw && x2 > -hw && y1 < hh && y2 > -hh)
+    this.drawSierpinski(v1, v1v2, v3v1, i)
+    this.drawSierpinski(v2, v1v2, v2v3, i)
+    this.drawSierpinski(v3, v2v3, v3v1, i)
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, scale, T} = this
+    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT} = this
     ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
-    const v = new V(max(HALF_WIDTH, HALF_HEIGHT) / 3, 0),
-      a = T.mul(new M().rotate(PI / 2).mul(v)),
-      b = T.mul(new M().rotate(PI / 2 + (PI * 2) / 3).mul(v)),
-      c = T.mul(new M().rotate(PI / 2 + (PI * 4) / 3).mul(v)),
-      s = floor(log2(scale))
 
-    this.kochCurve(b, a, s)
-    this.kochCurve(c, b, s)
-    this.kochCurve(a, c, s)
+    ctx.strokeStyle = PRI
+    ctx.lineWidth = 2
+
+    const v = new M().rotate(-PI / 6).mul(new V(this.UC, 0)),
+      T = new M().rotate((2 / 3) * PI),
+      v1 = T.mul(v),
+      v2 = T.mul(v1),
+      v3 = T.mul(v2)
+
+    this.drawSierpinski(this.T.mul(v1), this.T.mul(v2), this.T.mul(v3))
   }
 }
 

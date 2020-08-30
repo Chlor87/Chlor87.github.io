@@ -29,11 +29,10 @@ class App extends Base {
     // prettier-ignore
     this.T = new M(
       1, 0, this.HALF_WIDTH,
-      0, 1, -this.HALF_HEIGHT,
-      0, 0, 1
+      0, 1, -this.HALF_HEIGHT
     )
 
-    this.O = this.T.mul(new V(0, 0, 1))
+    this.O = this.T.mul(new V(0, 0))
     this.ctx.setTransform(1, 0, 0, -1, 0, 0)
   }
 
@@ -54,7 +53,7 @@ class App extends Base {
     // scale points so they stick to the circle
     this.points = this.points.map(p =>
       T.mul(new M().translate(UC, 0).rotate(arcMeasure(O, p))).mul(
-        new V(0, 0, 1)
+        new V(0, 0)
       )
     )
     requestAnimationFrame(this.draw)
@@ -104,7 +103,7 @@ class App extends Base {
     if (shiftKey) {
       θ = round(θ / (PI / 12)) * (PI / 12)
     }
-    this.P = T.mul(new V(cos(θ), -sin(θ), 1).mul(UC))
+    this.P = T.mul(new V(cos(θ), -sin(θ)).mul(UC))
     if (points.length === 3) {
       this.points[2] = this.P
     }
@@ -112,7 +111,7 @@ class App extends Base {
 
   drawCircle = () => {
     const {ctx, UC, O} = this
-    arc(O, 0, TWO_PI, UC, ctx, PRI)
+    arc(O, 0, TAU, UC, ctx, PRI)
     pointV(O, ctx, PRI)
   }
 
@@ -129,8 +128,11 @@ class App extends Base {
       return
     }
     const θ = arcMeasure(O, P),
-      v = T.mul(new M().translate(UC + 25, 0).rotate(θ)).mul(new V(0, 0, 1))
+      v = T.mul(new M().translate(UC + 25, 0).rotate(θ)).mul(new V(0, 0))
+
     joinV(O, P, ctx, PRI, true)
+
+    pointV(O, ctx, RED)
     this.typeAngle(v, arcMeasure(O, P))
   }
 
@@ -181,7 +183,7 @@ class App extends Base {
       arc([c[0], c[1]], φmin, φmax, UC / 4, ctx, inArc ? RED : GREEN)
       this.typeAngle(
         T.mul(new M().translate(UC + 50, 0).rotate(arcMeasure(O, c))).mul(
-          new V(0, 0, 1)
+          new V(0, 0)
         ),
         φmax - φmin
       )

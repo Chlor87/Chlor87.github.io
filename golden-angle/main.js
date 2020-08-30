@@ -1,5 +1,5 @@
 import '../common/global.js'
-import {SEC, PRI} from '../common/style.js'
+import {SEC, PRI, RED, GREEN} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
@@ -7,7 +7,7 @@ import M from '../common/M.js'
 /**
  * set some other irrational numbers for other spirals
  */
-const GOLDEN_ANGLE = TWO_PI * 1.61803398875
+const GOLDEN_ANGLE = TAU * 1.61803398875
 
 class App extends Base {
   i = 0
@@ -41,15 +41,17 @@ class App extends Base {
       t = new M()
         .scale(map(i, 0, this.numSeeds, 1, 4), 1)
         .translate(map(i, 0, this.numSeeds, 0, 0.75 * shorterSide), 0)
-        .rotate(theta - TWO_PI * this.i),
-      [ax, ay] = t.mul(new V(0, 0, 1)),
-      [bx, by] = t.mul(new V(8, 4, 1)),
-      [cx, cy] = t.mul(new V(16, 0, 1)),
-      [dx, dy] = t.mul(new V(8, -4, 1))
+        .rotate(
+          i % 2 === 0 ? theta - TAU * this.i : theta + TAU * this.i
+        ),
+      [ax, ay] = t.mul(new V(0, 0)),
+      [bx, by] = t.mul(new V(8, 4)),
+      [cx, cy] = t.mul(new V(16, 0)),
+      [dx, dy] = t.mul(new V(8, -4))
 
     ctx.save()
     ctx.lineWidth = 4
-    ctx.fillStyle = PRI
+    ctx.fillStyle = i % 2 === 0 ? GREEN : PRI
     ctx.strokeStyle = '#000'
     ctx.beginPath()
     ctx.moveTo(ax, ay)
