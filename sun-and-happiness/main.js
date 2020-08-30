@@ -28,7 +28,7 @@ class App extends Base {
   scale = 1
 
   colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
-  colorSteps = this.colors.map((_, i) => norm(i, 0, this.colors.length - 1))
+  colorSteps = this.colors.map((_, i) => norm(i, 0, this.colors.length))
 
   constructor(canvas) {
     super(canvas)
