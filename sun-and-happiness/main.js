@@ -3,6 +3,21 @@ import {PRI, SEC} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
+import {norm} from '../common/utils.js'
+
+const memo = fn => {
+  const store = new Map()
+  return (...args) => {
+    const [[x1, y1], [x2, y2]] = args,
+      k = x1.toFixed(2) + y1.toFixed(2) + x2.toFixed(2) + y2.toFixed(2)
+    if (store.has(k)) {
+      return store.get(k)
+    }
+    const res = fn(...args)
+    store.set(k, res)
+    return res
+  }
+}
 
 class App extends Base {
   i = 0
@@ -11,6 +26,9 @@ class App extends Base {
   startY = 0
   isDragging = false
   scale = 1
+
+  colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
+  colorSteps = this.colors.map((_, i) => norm(i, 0, this.colors.length - 1))
 
   constructor(canvas) {
     super(canvas)
@@ -66,7 +84,18 @@ class App extends Base {
     this.T = this.T.translate(dx, dy)
   }
 
-  drawInternal = (a, b, c, d, e, f, g, h) => {
+  getRainbow = memo((a, b) => {
+    const {ctx, colors, colorSteps} = this
+    const g = ctx.createLinearGradient(...a, ...b),
+      {length} = colors
+    for (let i = 0; i < length; i++) {
+      i > 0 && g.addColorStop(colorSteps[i], colors[i - 1])
+      g.addColorStop(colorSteps[i], colors[i])
+    }
+    return g
+  })
+
+  drawInternal = (a, b, c, d, e, f, g, h, gradient) => {
     const {ctx, T} = this
     a = T.mul(a)
     b = T.mul(b)
@@ -77,6 +106,7 @@ class App extends Base {
     g = T.mul(g)
     h = T.mul(h)
     ctx.beginPath()
+    gradient && (ctx.strokeStyle = this.getRainbow(a, d))
     ctx.moveTo(a[0], a[1])
     ctx.lineTo(b[0], b[1])
     ctx.lineTo(c[0], c[1])
@@ -88,7 +118,7 @@ class App extends Base {
     ctx.stroke()
   }
 
-  drawTrig = (v, r, step = 1) => {
+  drawHappiness = (v, r, step = 1) => {
     const {ctx, i, scale} = this,
       [x, y] = v,
       theta = TAU * (step % 2 === 1 ? i : -i),
@@ -111,26 +141,28 @@ class App extends Base {
 
     r /= PHI
     if (step <= log(scale ** 2) + 2) {
-      this.drawTrig(a, r, cpstep)
-      this.drawTrig(d, r, cpstep)
-      this.drawTrig(e, r, cpstep)
-      this.drawTrig(h, r, cpstep)
+      this.drawHappiness(a, r, cpstep)
+      this.drawHappiness(d, r, cpstep)
+      this.drawHappiness(e, r, cpstep)
+      this.drawHappiness(h, r, cpstep)
     }
 
     ctx.save()
     ctx.strokeStyle = '#000'
     ctx.lineWidth = (((1 / 4) * this.UC) / step) * scale + p
-    this.drawInternal(a1, b, c, d1, e1, f, g, h1)
+    this.drawInternal(a1, b, c, d1, e1, f, g, h1, false)
 
-    ctx.strokeStyle = SEC
     ctx.lineWidth = (((1 / 4) * this.UC) / step) * scale
-    this.drawInternal(a, b, c, d, e, f, g, h)
+    this.drawInternal(a, b, c, d, e, f, g, h, true)
     ctx.restore()
   }
 
   draw = ts => {
     const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT} = this
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = this.getRainbow(
+      [-HALF_WIDTH, HALF_HEIGHT],
+      [HALF_WIDTH, -HALF_HEIGHT]
+    )
     ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
     ctx.strokeStyle = PRI
     ctx.fillStyle = PRI
@@ -139,7 +171,7 @@ class App extends Base {
     if (this.i >= 1) {
       this.i = 0
     }
-    this.drawTrig(new V(0, 0), this.UC)
+    this.drawHappiness(new V(0, 0), this.UC)
 
     requestAnimationFrame(this.draw)
   }
@@ -147,14 +179,14 @@ class App extends Base {
 
 void (() => {
   // addEventListener('DOMContentLoaded', () => {
-    const app = new App(document.querySelector('#canvas'))
-    requestAnimationFrame(app.draw)
-    addEventListener(
-      'resize',
-      () => {
-        app.setupDimensions()
-      },
-      {passive: true}
-    )
+  const app = new App(document.querySelector('#canvas'))
+  requestAnimationFrame(app.draw)
+  addEventListener(
+    'resize',
+    () => {
+      app.setupDimensions()
+    },
+    {passive: true}
+  )
   // })
 })()
