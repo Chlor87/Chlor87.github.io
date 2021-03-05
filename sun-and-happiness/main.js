@@ -1,5 +1,6 @@
 import '../common/global.js'
-import {PRI, SEC} from '../common/style.js'
+import WorkerDispatcher from '../common/WorkerDispatcher.js'
+import {PRI} from '../common/style.js'
 import Base from '../common/Base.js'
 import V from '../common/V.js'
 import M from '../common/M.js'
@@ -27,13 +28,24 @@ class App extends Base {
   isDragging = false
   scale = 1
 
-  colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
+  colors = [
+    'red',
+    'orange',
+    'yellow',
+    'green',
+    'blue',
+    'indigo',
+    'violet'
+  ].reverse()
   colorSteps = this.colors.map((_, i) => norm(i, 0, this.colors.length))
 
   constructor(canvas) {
     super(canvas)
     this.setupDimensions()
     this.T = new M()
+
+    this.wd = new WorkerDispatcher()
+    this.wd.register('mul', './matrixWorker.js')
 
     canvas.addEventListener('mousedown', ({offsetX, offsetY}) => {
       this.startX = offsetX
@@ -50,7 +62,7 @@ class App extends Base {
     canvas.addEventListener(
       'wheel',
       ({offsetX, offsetY, deltaY}) => {
-        const {HALF_WIDTH, HALF_HEIGHT} = this,
+        const {HW: HALF_WIDTH, HH: HALF_HEIGHT} = this,
           s = deltaY < 0 ? 1.1 : 0.9,
           dx = (offsetX - HALF_WIDTH) * s,
           dy = -(offsetY - HALF_HEIGHT) * s
@@ -67,7 +79,7 @@ class App extends Base {
 
   setupDimensions() {
     super.setupDimensions()
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
+    const {ctx, HW: HALF_WIDTH, HH: HALF_HEIGHT} = this
     ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
     this.UC = 0.5 * min(HALF_WIDTH, HALF_HEIGHT)
   }
@@ -84,10 +96,18 @@ class App extends Base {
     this.T = this.T.translate(dx, dy)
   }
 
-  getRainbow = memo((a, b) => {
-    const {ctx, colors, colorSteps} = this
-    const g = ctx.createLinearGradient(...a, ...b),
+  getRainbow = memo((a, b, radial = false) => {
+    const {ctx, colors, colorSteps} = this,
       {length} = colors
+    let g
+
+    if (radial) {
+      const [x, y] = a.lerp(b, 0.5)
+      g = ctx.createRadialGradient(x, y, 0, x, y, magV(a, b) / 2)
+    } else {
+      g = ctx.createLinearGradient(...a, ...b)
+    }
+
     for (let i = 0; i < length; i++) {
       i > 0 && g.addColorStop(colorSteps[i], colors[i - 1])
       g.addColorStop(colorSteps[i], colors[i])
@@ -95,16 +115,22 @@ class App extends Base {
     return g
   })
 
-  drawInternal = (a, b, c, d, e, f, g, h, gradient) => {
-    const {ctx, T} = this
-    a = T.mul(a)
-    b = T.mul(b)
-    c = T.mul(c)
-    d = T.mul(d)
-    e = T.mul(e)
-    f = T.mul(f)
-    g = T.mul(g)
-    h = T.mul(h)
+  drawInternal = async (a, b, c, d, e, f, g, h, gradient) => {
+    const {ctx, T, wd} = this
+
+    void ([a, b, c, d, e, f, g, h] = await wd.send('mul', {
+      vectors: [a, b, c, d, e, f, g, h],
+      matrix: T
+    }))
+
+    // a = T.mul(a)
+    // b = T.mul(b)
+    // c = T.mul(c)
+    // d = T.mul(d)
+    // e = T.mul(e)
+    // f = T.mul(f)
+    // g = T.mul(g)
+    // h = T.mul(h)
     ctx.beginPath()
     gradient && (ctx.strokeStyle = this.getRainbow(a, d))
     ctx.moveTo(a[0], a[1])
@@ -118,7 +144,7 @@ class App extends Base {
     ctx.stroke()
   }
 
-  drawHappiness = (v, r, step = 1) => {
+  drawHappiness = async (v, r, step = 1) => {
     const {ctx, i, scale} = this,
       [x, y] = v,
       theta = TAU * (step % 2 === 1 ? i : -i),
@@ -139,29 +165,33 @@ class App extends Base {
       h1 = t.mul(new V(-r, -r).add(new V(-hp, 0))),
       cpstep = step + 1
 
-    r /= PHI
-    if (step <= log(scale ** 2) + 2) {
-      this.drawHappiness(a, r, cpstep)
-      this.drawHappiness(d, r, cpstep)
-      this.drawHappiness(e, r, cpstep)
-      this.drawHappiness(h, r, cpstep)
-    }
+    // r /= PHI
+    // if (step <= log(scale ** 2) + 2) {
+    //   await Promise.all([
+    //     this.drawHappiness(a, r, cpstep),
+    //     this.drawHappiness(d, r, cpstep),
+    //     this.drawHappiness(e, r, cpstep),
+    //     this.drawHappiness(h, r, cpstep)
+    //   ])
+    // }
 
     ctx.save()
     ctx.strokeStyle = '#000'
     ctx.lineWidth = (((1 / 4) * this.UC) / step) * scale + p
-    this.drawInternal(a1, b, c, d1, e1, f, g, h1, false)
+
+    // await this.drawInternal(a1, b, c, d1, e1, f, g, h1, false)
 
     ctx.lineWidth = (((1 / 4) * this.UC) / step) * scale
-    this.drawInternal(a, b, c, d, e, f, g, h, true)
+    await this.drawInternal(a, b, c, d, e, f, g, h, true)
     ctx.restore()
   }
 
-  draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT} = this
+  draw = async ts => {
+    const {ctx, HW: HALF_WIDTH, HH: HALF_HEIGHT, W: WIDTH, H: HEIGHT} = this
     ctx.fillStyle = this.getRainbow(
-      [-HALF_WIDTH, HALF_HEIGHT],
-      [HALF_WIDTH, -HALF_HEIGHT]
+      new V(-HALF_WIDTH, HALF_HEIGHT),
+      new V(HALF_WIDTH, -HALF_HEIGHT),
+      true
     )
     ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
     ctx.strokeStyle = PRI
@@ -171,7 +201,7 @@ class App extends Base {
     if (this.i >= 1) {
       this.i = 0
     }
-    this.drawHappiness(new V(0, 0), this.UC)
+    await this.drawHappiness(new V(0, 0), this.UC)
 
     requestAnimationFrame(this.draw)
   }

@@ -16,35 +16,35 @@ class App extends Base {
   }
 
   setMousePos = ({clientX, clientY}) => {
-    const {canvas, WIDTH, HEIGHT} = this,
+    const {canvas, W, H} = this,
       {left, top} = canvas.getBoundingClientRect()
-    this.mX = map(clientX - left, 0, WIDTH, -2, 2)
-    this.mY = map(clientY - top, 0, HEIGHT, -2, 2)
+    this.mX = map(clientX - left, 0, W, -2, 2)
+    this.mY = map(clientY - top, 0, H, -2, 2)
   }
 
   setupDimensions() {
     super.setupDimensions()
-    const {HALF_WIDTH, HALF_HEIGHT, ctx} = this
-    ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
+    const {HW, HH, ctx} = this
+    ctx.setTransform(1, 0, 0, -1, HW, HH)
     this.axes = {
-      x1: new V(-HALF_WIDTH, 0),
-      x2: new V(HALF_WIDTH, 0),
-      y1: new V(0, -HALF_HEIGHT),
-      y2: new V(0, HALF_HEIGHT)
+      x1: new V(-HW, 0),
+      x2: new V(HW, 0),
+      y1: new V(0, -HH),
+      y2: new V(0, HH)
     }
   }
 
   drawAxes = () => {
     const {ctx, axes: {x1, x2, y1, y2}} = this
     ctx.save()
-    ctx.lineWidth = 1
+    ctx.lineW = 1
     joinV(x1, x2, ctx, SEC)
     joinV(y1, y2, ctx, SEC)
     ctx.restore()
   }
 
   drawComplex() {
-    const {ctx, mX, mY, HALF_WIDTH, HALF_HEIGHT} = this
+    const {ctx, mX, mY, HW, HH} = this
     let z = new C(mX, mY),
       c = new C(mX, mY),
       prev
@@ -57,10 +57,10 @@ class App extends Base {
         break
       }
       const [re, im] = z,
-        prevX = map(prev[0], -2, 2, -HALF_WIDTH, HALF_WIDTH),
-        prevY = map(prev[1], -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
-        x = map(re, -2, 2, -HALF_WIDTH, HALF_WIDTH),
-        y = map(im, -2, 2, HALF_HEIGHT, -HALF_HEIGHT),
+        prevX = map(prev[0], -2, 2, -HW, HW),
+        prevY = map(prev[1], -2, 2, HH, -HH),
+        x = map(re, -2, 2, -HW, HW),
+        y = map(im, -2, 2, HH, -HH),
         v1 = new V(prevX, prevY),
         v2 = new V(x, y)
       pointV(v1, ctx, PRI)
@@ -69,17 +69,17 @@ class App extends Base {
   }
 
   clear = () => {
-    const {ctx, WIDTH, HEIGHT} = this
+    const {ctx, W, H} = this
     ctx.save()
     ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.fillRect(0, 0, WIDTH, HEIGHT)
+    ctx.fillRect(0, 0, W, H)
     ctx.restore()
   }
 
   draw = () => {
     const {ctx, clear} = this
     ctx.fillStyle = '#000000'
-    ctx.lineWidth = 2
+    ctx.lineW = 2
     clear()
     this.drawAxes()
     this.drawComplex()

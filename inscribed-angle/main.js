@@ -28,8 +28,8 @@ class App extends Base {
     super.setupDimensions()
     // prettier-ignore
     this.T = new M(
-      1, 0, this.HALF_WIDTH,
-      0, 1, -this.HALF_HEIGHT
+      1, 0, this.HW,
+      0, 1, -this.HH
     )
 
     this.O = this.T.mul(new V(0, 0))
@@ -197,9 +197,9 @@ class App extends Base {
   }
 
   draw = () => {
-    const {ctx, WIDTH, HEIGHT} = this
-    ctx.fillRect(0, 0, WIDTH, -HEIGHT)
-    ctx.lineWidth = 2
+    const {ctx, W, H} = this
+    ctx.fillRect(0, 0, W, -H)
+    ctx.lineW = 2
     this.drawCircle()
     this.drawPoints()
     this.drawMouse()

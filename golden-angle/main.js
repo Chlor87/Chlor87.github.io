@@ -22,9 +22,9 @@ class App extends Base {
 
   setupDimensions() {
     super.setupDimensions()
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
-    ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
-    this.shorterSide = min(this.WIDTH, this.HEIGHT) / 2
+    const {ctx, HW, HH} = this
+    ctx.setTransform(1, 0, 0, -1, HW, HH)
+    this.shorterSide = min(this.W, this.H) / 2
   }
 
   drawPetals = () => {
@@ -41,16 +41,14 @@ class App extends Base {
       t = new M()
         .scale(map(i, 0, this.numSeeds, 1, 4), 1)
         .translate(map(i, 0, this.numSeeds, 0, 0.75 * shorterSide), 0)
-        .rotate(
-          i % 2 === 0 ? theta - TAU * this.i : theta + TAU * this.i
-        ),
+        .rotate(i % 2 === 0 ? theta - TAU * this.i : theta + TAU * this.i),
       [ax, ay] = t.mul(new V(0, 0)),
       [bx, by] = t.mul(new V(8, 4)),
       [cx, cy] = t.mul(new V(16, 0)),
       [dx, dy] = t.mul(new V(8, -4))
 
     ctx.save()
-    ctx.lineWidth = 4
+    ctx.lineW = 4
     ctx.fillStyle = i % 2 === 0 ? GREEN : PRI
     ctx.strokeStyle = '#000'
     ctx.beginPath()
@@ -64,9 +62,9 @@ class App extends Base {
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT} = this
+    const {ctx, HW, HH, W, H} = this
     ctx.strokeStyle = PRI
-    ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
+    ctx.fillRect(-HW, -HH, W, H)
     this.drawPetals()
     this.i += 0.001 * this.dir
     if (this.i >= 1) {

@@ -34,10 +34,10 @@ class App extends Base {
     canvas.addEventListener(
       'wheel',
       ({offsetX, offsetY, deltaY}) => {
-        const {HALF_WIDTH, HALF_HEIGHT} = this,
+        const {HW, HH} = this,
           s = deltaY < 0 ? 1.1 : 0.9,
-          dx = (offsetX - HALF_WIDTH) * s,
-          dy = -(offsetY - HALF_HEIGHT) * s
+          dx = (offsetX - HW) * s,
+          dy = -(offsetY - HH) * s
         this.scale *= s
         if (this.scale < 0.1 || this.scale > 1000) {
           this.scale /= s
@@ -52,9 +52,9 @@ class App extends Base {
 
   setupDimensions() {
     super.setupDimensions()
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
-    ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
-    this.max = hypot(HALF_WIDTH, HALF_HEIGHT)
+    const {ctx, HW, HH} = this
+    ctx.setTransform(1, 0, 0, -1, HW, HH)
+    this.max = hypot(HW, HH)
   }
 
   handleMouseMove = ({offsetX, offsetY}) => {
@@ -71,11 +71,11 @@ class App extends Base {
   }
 
   drawAxes = () => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this,
-      x1 = new V(-HALF_WIDTH, 0),
-      x2 = new V(HALF_WIDTH, 0),
-      y1 = new V(0, -HALF_HEIGHT),
-      y2 = new V(0, HALF_HEIGHT)
+    const {ctx, HW, HH} = this,
+      x1 = new V(-HW, 0),
+      x2 = new V(HW, 0),
+      y1 = new V(0, -HH),
+      y2 = new V(0, HH)
     joinV(x1, x2, ctx, SEC)
     joinV(y1, y2, ctx, SEC)
   }
@@ -111,18 +111,18 @@ class App extends Base {
   }
 
   test = (a, b) => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this,
+    const {ctx, HW, HH} = this,
       [x1, x2] = a[0] > b[0] ? [b[0], a[0]] : [a[0], b[0]],
       [y1, y2] = a[1] > b[1] ? [b[1], a[1]] : [a[1], b[1]],
-      hw = HALF_WIDTH * 2,
-      hh = HALF_HEIGHT * 2
+      hw = HW * 2,
+      hh = HH * 2
     return !(x1 < hw && x2 > -hw && y1 < hh && y2 > -hh)
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, scale, T} = this
-    ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
-    const v = new V(max(HALF_WIDTH, HALF_HEIGHT) / 3, 0),
+    const {ctx, HW, HH, W, H, scale, T} = this
+    ctx.fillRect(-HW, -HH, W, H)
+    const v = new V(max(HW, HH) / 3, 0),
       a = T.mul(new M().rotate(PI / 2).mul(v)),
       b = T.mul(new M().rotate(PI / 2 + (PI * 2) / 3).mul(v)),
       c = T.mul(new M().rotate(PI / 2 + (PI * 4) / 3).mul(v)),

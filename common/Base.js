@@ -1,10 +1,10 @@
 import V from './V.js'
 export default class Base {
   UC = 100
-  WIDTH = 0
-  HEIGHT = 0
-  HALF_WIDTH = 0
-  HALF_HEIGHT = 0
+  W = 0
+  H = 0
+  HW = 0
+  HH = 0
 
   constructor(canvas) {
     this.canvas = canvas
@@ -14,13 +14,13 @@ export default class Base {
 
   setupDimensions() {
     const {canvas} = this
-    this.WIDTH = document.documentElement.clientWidth
-    this.HEIGHT = document.documentElement.clientHeight
-    this.HALF_WIDTH = round(this.WIDTH / 2)
-    this.HALF_HEIGHT = round(this.HEIGHT / 2)
-    this.UC = (1 / 2) * this.HALF_HEIGHT
-    const {WIDTH, HEIGHT} = this
-    canvas.width = canvas.style.width = WIDTH
-    canvas.height = canvas.style.height = HEIGHT
+    this.W = document.documentElement.clientWidth
+    this.H = document.documentElement.clientHeight
+    this.HW = round(this.W / 2)
+    this.HH = round(this.H / 2)
+    this.UC = (1 / 2) * this.HH
+    const {W, H} = this
+    canvas.width = canvas.style.width = W
+    canvas.height = canvas.style.height = H
   }
 }

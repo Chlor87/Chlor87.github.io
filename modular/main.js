@@ -35,9 +35,9 @@ class App extends Base {
 
   setupDimensions() {
     super.setupDimensions()
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, UC, numPoints} = this
-    ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
-    this.UC = min(HALF_WIDTH, HALF_HEIGHT) * 0.75
+    const {ctx, HW, HH, UC, numPoints} = this
+    ctx.setTransform(1, 0, 0, -1, HW, HH)
+    this.UC = min(HW, HH) * 0.75
   }
 
   handleMouseDown = ({offsetX, offsetY}) => {
@@ -140,8 +140,8 @@ class App extends Base {
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT, run} = this
-    ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
+    const {ctx, HW, HH, W, H, run} = this
+    ctx.fillRect(-HW, -HH, W, H)
     this.step = clamp(this.step, 0, this.maxStep)
     this.drawPoints()
     if (run) {

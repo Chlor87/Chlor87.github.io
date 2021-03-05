@@ -33,10 +33,10 @@ class App extends Base {
     canvas.addEventListener(
       'wheel',
       ({offsetX, offsetY, deltaY}) => {
-        const {HALF_WIDTH, HALF_HEIGHT} = this,
+        const {HW, HH} = this,
           s = deltaY < 0 ? 1.1 : 0.9,
-          dx = (offsetX - HALF_WIDTH) * s,
-          dy = -(offsetY - HALF_HEIGHT) * s
+          dx = (offsetX - HW) * s,
+          dy = -(offsetY - HH) * s
         this.scale *= s
         if (this.scale < 0.1 || this.scale > 1000) {
           this.scale /= s
@@ -51,9 +51,9 @@ class App extends Base {
 
   setupDimensions() {
     super.setupDimensions()
-    const {ctx, HALF_WIDTH, HALF_HEIGHT} = this
-    ctx.setTransform(1, 0, 0, -1, HALF_WIDTH, HALF_HEIGHT)
-    this.max = hypot(HALF_WIDTH, HALF_HEIGHT)
+    const {ctx, HW, HH} = this
+    ctx.setTransform(1, 0, 0, -1, HW, HH)
+    this.max = hypot(HW, HH)
     this.UC = 0.4 * this.max
   }
 
@@ -104,8 +104,8 @@ class App extends Base {
   }
 
   draw = ts => {
-    const {ctx, HALF_WIDTH, HALF_HEIGHT, WIDTH, HEIGHT} = this
-    ctx.fillRect(-HALF_WIDTH, -HALF_HEIGHT, WIDTH, HEIGHT)
+    const {ctx, HW, HH, W, H} = this
+    ctx.fillRect(-HW, -HH, W, H)
 
     ctx.strokeStyle = PRI
     ctx.lineWidth = 2
