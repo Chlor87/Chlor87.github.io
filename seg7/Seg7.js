@@ -47,10 +47,8 @@ export default class Seg7 {
 
   setDigit(n) {
     const d = digitMap[n]
-    let i = 0
-    while (i < 8) {
+    for (let i = 0; i < this.tiles.length; i++) {
       this.tiles[i]?.setState(mask & (d >> i))
-      i++
     }
   }
 

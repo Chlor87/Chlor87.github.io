@@ -1,6 +1,6 @@
 import {vec} from '../common/V.js'
 
-export const BASE_LENGTH = 9
+export const BASE_LENGTH = 10
 
 export default class Tile {
   state = 0
@@ -11,8 +11,8 @@ export default class Tile {
 
   off = [
     vec(0, 0),
-    vec(BASE_LENGTH / 9, 1),
-    vec((BASE_LENGTH * 8) / 9, 1),
+    vec(1, 1),
+    vec(BASE_LENGTH - 1, 1),
     vec(BASE_LENGTH, 0)
   ]
   on = this.off.map(v => {

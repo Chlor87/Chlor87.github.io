@@ -1,6 +1,5 @@
 import '../common/global.js'
 import Base from '../common/Base.js'
-import M from '../common/M.js'
 import {vec} from '../common/V.js'
 import Seg7 from './Seg7.js'
 import {BASE_LENGTH} from './Tile.js'
@@ -13,11 +12,10 @@ const splitDigits = n => {
 }
 
 const getTime = () => {
-  const now = new Date(),
-    h = now.getHours(),
-    m = now.getMinutes(),
-    s = now.getSeconds()
-  return [h, m, s].flatMap(splitDigits)
+  const now = new Date()
+  return [now.getHours(), now.getMinutes(), now.getSeconds()].flatMap(
+    splitDigits
+  )
 }
 
 class App extends Base {
@@ -47,7 +45,13 @@ class App extends Base {
       const isSpace = (i + 1) % 2 === 0,
         offset = (isSpace ? margin : -margin) / 2,
         pos = vec(map(i, 0, 5, lo, hi) - offset, -screenLen)
-      this.segments[i] = new Seg7({ctx, pos, len, openColor: PRI, closeColor: BLACK})
+      this.segments[i] = new Seg7({
+        ctx,
+        pos,
+        len,
+        openColor: PRI,
+        closeColor: BLACK
+      })
     }
 
     for (let i = 0; i < 2; i++) {
@@ -69,7 +73,7 @@ class App extends Base {
     ctx.fillRect(-HW, HH, W, -H)
 
     for (let i = 0; i < segments.length; i++) {
-      segments[i].setDigit(now[i])
+      segments[i].setDigit(now[i] || 8)
       segments[i].draw()
     }
     for (let i = 0; i < colons.length; i++) {
