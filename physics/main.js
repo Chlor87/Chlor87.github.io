@@ -20,12 +20,12 @@ class Particle {
   }
 
   applyForce(f) {
-    this.a = f.div(this.m / 100)
+    this.a = this.a.add(f.div(this.m * 1000))
     this.c = `rgba(${zToColor(this.a).join(', ')})`
   }
 
   update() {
-    this.v = this.v.add(this.a).limit(15)
+    this.v = this.v.add(this.a)
     this.p = this.p.add(this.v)
     this.a.set(0, 0)
   }
@@ -84,7 +84,7 @@ class App extends Base {
     const {ctx, HW, HH, W, H} = this
     ctx.fillRect(-HW, HH, W, -H)
     for (let p of this.ps) {
-      p.applyForce(this.mouse.sub(p.p).norm().mul(0.1))
+      p.applyForce(this.mouse.sub(p.p))
       p.draw()
     }
     requestAnimationFrame(this.draw)

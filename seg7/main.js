@@ -73,7 +73,7 @@ class App extends Base {
     ctx.fillRect(-HW, HH, W, -H)
 
     for (let i = 0; i < segments.length; i++) {
-      segments[i].setDigit(now[i] || 8)
+      segments[i].setDigit(now[i])
       segments[i].draw()
     }
     for (let i = 0; i < colons.length; i++) {
