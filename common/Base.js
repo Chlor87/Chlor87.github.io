@@ -1,4 +1,3 @@
-import V from './V.js'
 export default class Base {
   UC = 100
   W = 0

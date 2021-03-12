@@ -98,6 +98,12 @@ export default class V extends Float32Array {
     return hypot(this[0], this[1])
   }
 
+  set mag(m) {
+    const {mag} = this
+    this[0] = this[0] / mag * m
+    this[1] = this[1] / mag * m
+  }
+
   get dir() {
     return normalizeAngle(atan2(this[1], this[0]))
   }
@@ -123,4 +129,10 @@ export default class V extends Float32Array {
     const v = new V(this)
     return this.mag <= scalar ? v : v.norm().mul(scalar)
   }
+
+  static rand(minX, maxX, minY, maxY) {
+    return new V(rand(minX, maxX), rand(minY, maxY))
+  }
 }
+
+export const vec = (...args) => new V(...args)
