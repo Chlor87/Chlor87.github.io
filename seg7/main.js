@@ -1,9 +1,8 @@
 import '../common/global.js'
 import Base from '../common/Base.js'
-import {vec} from '../common/V.js'
 import Seg7 from './Seg7.js'
+import {vec} from '../common/V.js'
 import {BASE_LENGTH} from './Tile.js'
-import {pointV} from '../common/utils.js'
 import {BLACK, PRI} from '../common/style.js'
 
 const splitDigits = n => {
@@ -67,10 +66,11 @@ class App extends Base {
   }
 
   draw = () => {
-    requestAnimationFrame(this.draw)
     const {ctx, HW, HH, W, H, segments, colons} = this,
       now = getTime()
     ctx.fillRect(-HW, HH, W, -H)
+
+    requestAnimationFrame(this.draw)
 
     for (let i = 0; i < segments.length; i++) {
       segments[i].setDigit(now[i])

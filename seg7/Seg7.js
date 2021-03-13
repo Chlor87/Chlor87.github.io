@@ -39,7 +39,8 @@ export default class Seg7 {
           len,
           rot: rotMap[i],
           openColor,
-          closeColor
+          closeColor,
+          duration: .5
         })
       )
     }

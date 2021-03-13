@@ -2,27 +2,42 @@ import {vec} from '../common/V.js'
 
 export const BASE_LENGTH = 10
 
+const ease = x => sin((PI * x) / 2) ** 2
+
 export default class Tile {
   state = 0
-
-  transition = false
-  step = 0
+  step = 60
   dir = -1
+  duration = 2
+  transition = false
 
-  off = [
-    vec(0, 0),
-    vec(1, 1),
-    vec(BASE_LENGTH - 1, 1),
-    vec(BASE_LENGTH, 0)
-  ]
+  off = [vec(0, 0), vec(1, 1), vec(BASE_LENGTH - 1, 1), vec(BASE_LENGTH, 0)]
   on = this.off.map(v => {
     const n = vec(v)
     n.y *= -1
     return n
   })
 
-  constructor({ctx, len, pos = vec(), rot = 0, openColor, closeColor}) {
-    Object.assign(this, {ctx, len, pos, rot, openColor, closeColor})
+  constructor({
+    ctx,
+    len,
+    pos = vec(),
+    rot = 0,
+    openColor,
+    closeColor,
+    duration = 2
+  }) {
+    Object.assign(this, {
+      ctx,
+      len,
+      pos,
+      rot,
+      openColor,
+      closeColor,
+      duration
+    })
+    this.step *= duration
+    this.max = this.step
     const {off, on} = this
     for (let i = 0; i < off.length; i++) {
       off[i] = off[i]
@@ -65,25 +80,28 @@ export default class Tile {
   }
 
   animate() {
-    const {on, off, drawTile, dir, openColor, closeColor} = this
-    this.step = this.step + 0.2 * dir
-    if (this.step > 1 || this.step < 0) {
+    const {on, off, drawTile, dir, openColor, closeColor, step, max} = this,
+      shape = []
+
+    this.step = step + 1 * dir
+    if (this.step > max || this.step < 0) {
       this.dir *= -1
       this.transition = false
     }
-    let shape = []
+
+    const mapped = map(this.step, 0, max, 0, 1)
     for (let i = 0; i < on.length; i++) {
-      shape[i] = on[i].lerp(off[i], this.step)
+      shape[i] = on[i].lerp(off[i], ease(mapped))
     }
-    drawTile(shape, this.step > 0.5 ? closeColor : openColor)
+    drawTile(shape, mapped > 0.5 ? closeColor : openColor)
   }
 
   draw() {
-    const {drawTile, off, state, transition, on, openColor, closeColor} = this
+    const {off, state, transition, on, openColor, closeColor} = this
     if (state === 0 && !transition) {
       return
     }
-    drawTile(off, this.openColor)
+    this.drawTile(off, this.openColor)
     transition
       ? this.animate()
       : this.drawTile(on, state === 1 ? openColor : closeColor)
