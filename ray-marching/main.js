@@ -43,9 +43,9 @@ class App extends Base {
       new Line(ctx, vec(-300, -100), vec(-200, 100)),
       new Line(ctx, vec(500, 200), vec(500.1, -200)),
 
-      new Line(ctx, vec(-HW + 1, -HH), vec(-HW + 2, HH)),
+      new Line(ctx, vec(-HW + 1, -HH), vec(-HW + 1.01, HH)),
       new Line(ctx, vec(-HW, HH), vec(HW, HH)),
-      new Line(ctx, vec(HW - 1, HH), vec(HW, -HH)),
+      new Line(ctx, vec(HW - .1, HH), vec(HW, -HH)),
       new Line(ctx, vec(-HW, -HH), vec(HW, -HH))
     ]
     this.camera = new Camera({
@@ -55,7 +55,7 @@ class App extends Base {
       world: this.world,
       HW,
       HH,
-      fov: 60
+      fov: 90
     })
     canvas.addEventListener('mousemove', ({offsetX, offsetY}) => {
       const {HW, HH} = this
@@ -69,19 +69,11 @@ class App extends Base {
       }
     })
     addEventListener(
-      'keydown',
-      e => {
-        setKey(this.keyMap, true)(e)
-        // requestAnimationFrame(this.draw)
-      },
+      'keydown', setKey(this.keyMap, true),
       {passive: true}
     )
     addEventListener(
-      'keyup',
-      e => {
-        setKey(this.keyMap, false)(e)
-        // requestAnimationFrame(this.draw)
-      },
+      'keyup', setKey(this.keyMap, false),
       {passive: true}
     )
   }
@@ -93,7 +85,7 @@ class App extends Base {
   }
 
   applyKeys = () => {
-    const {keyMap, camera, showMap} = this
+    const {keyMap, camera} = this
     Object.entries(keyMap).forEach(([k, v]) => {
       if (!v) {
         return
@@ -120,7 +112,7 @@ class App extends Base {
   }
 
   drawScene = () => {
-    const {ctx, ray, HW, HH, W, H, camera} = this,
+    const {ctx, HW, HH, W, H, camera} = this,
       len = camera.rays.length,
       size = W / len
 
@@ -129,7 +121,10 @@ class App extends Base {
       const ray = camera.rays[len - i - 1]
       let [dist] = ray.march()
       dist *= cos(ray.offset)
-      const c = map(dist, 0, HW, 255, 0)
+      if (HH - dist < 0) {
+        continue
+      }
+      const c = map(dist, 0, HW/2, 255, 0)
       ctx.fillStyle = `rgb(0, ${c}, ${c})`
       ctx.fillRect(-HW + size * i, HH - dist, size + 1, -H + 2 * dist)
     }
