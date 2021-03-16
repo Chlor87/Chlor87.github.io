@@ -1,4 +1,4 @@
-import {BLUE, GREEN, PRI, RED} from '../common/style.js'
+import {PRI} from '../common/style.js'
 import {joinV, magV, pointV} from '../common/utils.js'
 import {vec} from '../common/V.js'
 
@@ -29,6 +29,9 @@ export class Line {
     Object.assign(this, {ctx, a, b, color})
   }
 
+  /**
+   * a local minimum of a distance between a point and a line
+   */
   distTo(v) {
     const [x1, y1] = v,
       {
@@ -39,11 +42,11 @@ export class Line {
       } = this,
       m = (y3 - y2) / (x3 - x2),
       s = -m * x2 + y2,
-      d = 1 + m ** 2
-      const x = (x1 - s * m + m * y1) / d,
+      d = 1 + m ** 2,
+      x = (x1 - s * m + m * y1) / d,
       P = vec(x, m * x + s),
       res = inBounds(P, a, b) ? magV(v, P) : min(magV(v, a), magV(v, b))
-      return res <= 1 ? 0 : res
+    return res <= 1 ? 0 : res
   }
 
   draw() {
