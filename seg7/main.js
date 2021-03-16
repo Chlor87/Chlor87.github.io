@@ -95,3 +95,18 @@ void (() => {
     )
   })
 })()
+
+const riemannSum = (fn, range, divs) => {
+  const [lo, hi] = range,
+    x = (hi - lo) / divs
+  let left = 0,
+    right = 0
+  for (let i = lo; i <= hi; i += x) {
+    const y = fn(i)
+    i < hi && (left += y)
+    i > 0 && (right += y)
+  }
+  return 0.5 * x * (left + right)
+}
+
+console.log(riemannSum(x => x ** 2, vec(1, 3), 1e3))

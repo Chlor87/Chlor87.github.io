@@ -123,8 +123,9 @@ class App extends Base {
         max = ray.maxLength * c
       let [dist, [r, g, b]] = ray.march()
       dist *= c
-      const color = `rgba(${r}, ${g}, ${b}, ${norm(dist, max, 0)})`
-      const h = map(dist, 0, max, H, 0)
+      const alpha = norm(dist, max, 0),
+       color = `rgb(${r * alpha}, ${g * alpha}, ${b * alpha})`,
+       h = map(dist, 0, max, H, 0)
 
       ctx.fillStyle = color
       ctx.fillRect(-HW + size * i, HH - (H - h) / 2, size+1, -h)

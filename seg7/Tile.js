@@ -89,11 +89,11 @@ export default class Tile {
       this.transition = false
     }
 
-    const mapped = map(this.step, 0, max, 0, 1)
+    const n = norm(this.step, 0, max)
     for (let i = 0; i < on.length; i++) {
-      shape[i] = on[i].lerp(off[i], ease(mapped))
+      shape[i] = on[i].lerp(off[i], ease(n))
     }
-    drawTile(shape, mapped > 0.5 ? closeColor : openColor)
+    drawTile(shape, n > 0.5 ? closeColor : openColor)
   }
 
   draw() {
