@@ -73,6 +73,16 @@ export const joinV = ([x1, y1], [x2, y2], ctx, color, arrow = false) => {
 
 export const magV = (v1, v2) => hypot(v2.x - v1.x, v2.y - v1.y)
 
+export const circleV = (v, ctx, r, color = PRI) => {
+  ctx.save()
+  ctx.beginPath()
+  ctx.strokeStyle = color
+  ctx.arc(...v, r, 0, TAU)
+  ctx.closePath()
+  ctx.stroke()
+  ctx.restore()
+}
+
 export const arc = ([x, y], a, b, r, ctx, color) => {
   ctx.save()
   ctx.lineWidth = 2

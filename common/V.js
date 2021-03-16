@@ -99,13 +99,19 @@ export default class V extends Float32Array {
   }
 
   set mag(m) {
-    const {mag} = this
-    this[0] = this[0] / mag * m
-    this[1] = this[1] / mag * m
+    const {dir} = this
+    this[0] = m * cos(dir)
+    this[1] = m * sin(dir)
   }
 
   get dir() {
     return normalizeAngle(atan2(this[1], this[0]))
+  }
+
+  set dir(theta) {
+    const {mag} = this
+    this[0] = mag * cos(theta)
+    this[1] = mag * sin(theta)
   }
 
   translate(x, y) {
@@ -136,3 +142,6 @@ export default class V extends Float32Array {
 }
 
 export const vec = (...args) => new V(...args)
+
+export const fromDir = theta => new V(cos(theta), sin(theta))
+export const fromPolar = (mag, dir) => new V(cos(dir), sin(dir)).mul(mag)
