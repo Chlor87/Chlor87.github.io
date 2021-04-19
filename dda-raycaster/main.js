@@ -144,7 +144,7 @@ class App extends Base {
     return {dist: res, dir: res === lenX ? 0 : 1, offset}
   }
 
-  cast() {
+  cast = () => {
     const {nRays, fov} = this,
       rays = []
 
@@ -182,25 +182,25 @@ class App extends Base {
 
     for (let i = 0; i < rays.length; i++) {
       const {dist, dir, offset} = rays[i],
-        h = map(clamp(dist * cos(offset), 0, nTiles), 0, nTiles, H, 0)
+        h = map(clamp(dist * cos(offset), 0, nTiles), 0, nTiles, H * .9, 0)
       if (h < 0) {
         return
       }
       ctx.fillStyle = dir === 0 ? RED : '#aa0000'
-      ctx.fillRect(-HW + i * segW, HH - (H - h) / 2, segW + 1, -h)
+      ctx.fillRect(-HW + i * segW, h / 2, segW + 1, -h)
     }
     ctx.restore()
   }
 
   draw = () => {
-    const {ctx, HW, HH, W, H, drawWorld, drawAxes, drawRays} = this
+    const {ctx, HW, HH, W, H, drawWorld, drawRays, drawView, cast, p} = this
     ctx.fillRect(-HW, HH, W, -H)
     ctx.strokeStyle = SEC
-    const rays = this.cast()
-    this.drawView(rays)
+    const rays = cast()
+    drawView(rays)
     drawWorld()
     drawRays(rays)
-    this.p.draw(ctx)
+    p.draw(ctx)
 
     requestAnimationFrame(this.draw)
   }

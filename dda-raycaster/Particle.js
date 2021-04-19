@@ -1,7 +1,8 @@
 import {joinV, normalizeAngle, pointV} from '../common/utils.js'
 import V, {fromPolar} from '../common/V.js'
 
-const TURN = PI / (360 * 4)
+const TURN = PI / (360 * 4),
+  listeners = {}
 
 export default class Particle extends V {
   acc = 0
@@ -36,8 +37,10 @@ export default class Particle extends V {
 
   bindCtrl = () => {
     const {handleKeyDown, handleKeyUp} = this
-    removeEventListener('keydown', handleKeyDown)
-    removeEventListener('keyup', handleKeyUp)
+    listeners.keyDown && removeEventListener('keydown', listeners.keyDown)
+    listeners.keyUp && removeEventListener('keyup', listeners.keyUp)
+    listeners.keyDown = handleKeyDown
+    listeners.keyUp = handleKeyUp
     addEventListener('keydown', handleKeyDown)
     addEventListener('keyup', handleKeyUp)
   }
@@ -101,9 +104,13 @@ export default class Particle extends V {
       }
       if (y === intY) {
         pX < x && x - pX <= r && (this.x = pos.x + x * tileSize.x - this.r)
-        pX > x && pX - x - 1 <= r && (this.x = pos.x + (x + 1) * tileSize.x + this.r)
+        pX > x &&
+          pX - x - 1 <= r &&
+          (this.x = pos.x + (x + 1) * tileSize.x + this.r)
       } else if (x === intX) {
-        pY > y && pY - y - 1 <= r && (this.y = pos.y + (y + 1) * tileSize.y - this.r)
+        pY > y &&
+          pY - y - 1 <= r &&
+          (this.y = pos.y + (y + 1) * tileSize.y - this.r)
         pY < y && y - pY <= r && (this.y = pos.y + y * tileSize.y + this.r)
       }
     })
@@ -111,11 +118,11 @@ export default class Particle extends V {
 
   update() {
     this.updateForces()
-    this.collide()
     this.vel += this.acc
     this.dirVel += this.dirAcc
     this.dir = normalizeAngle(this.dir + this.dirVel)
     this.set(this.add(fromPolar(this.vel, this.dir)))
+    this.collide()
 
     this.acc = 0
     this.dirAcc = 0
