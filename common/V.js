@@ -1,7 +1,11 @@
 import {normalizeAngle} from './utils.js'
 import M from './M.js'
 
+export const gte = (l, r) => l >= r,
+  lte = (l, r) => l <= r
+
 const {isView} = ArrayBuffer
+
 export default class V extends Float32Array {
   constructor(...args) {
     super(2)
@@ -105,7 +109,7 @@ export default class V extends Float32Array {
   }
 
   get dir() {
-    return normalizeAngle(atan2(this[1], this[0]))
+    return normalizeAngle(atan2(this.y, this.x))
   }
 
   set dir(theta) {
@@ -131,15 +135,42 @@ export default class V extends Float32Array {
     return mag != 0 ? new V(this).div(this.mag) : this
   }
 
-  limit(scalar) {
+  limit(scalar, cmp = lte) {
     const v = new V(this)
-    return this.mag <= scalar ? v : v.norm().mul(scalar)
+    return cmp(this.mag, scalar) ? v : v.norm().mul(scalar)
+  }
+
+  limitR(scalar) {
+    const v = vec(this)
+    return this.mag >= scalar ? v : v.norm().mul(scalar)
   }
 
   static rand(minX, maxX, minY, maxY) {
     return new V(rand(minX, maxX), rand(minY, maxY))
   }
+
+  floor() {
+    const v = vec(this)
+    v.x = floor(v.x)
+    v.y = floor(v.y)
+    return v
+  }
 }
+
+const setBasicMath = () => {
+  ;['abs', 'floor', 'ceil', 'round'].forEach(k => {
+    Object.defineProperty(V.prototype, k, {
+      value() {
+        const v = new V(this)
+        v.x = Math[k](v.x)
+        v.y = Math[k](v.y)
+        return v
+      }
+    })
+  })
+}
+
+setBasicMath()
 
 export const vec = (...args) => new V(...args)
 

@@ -10,7 +10,8 @@ export const TAU = 2 * PI,
   lerp = (n, min, max) => n * (max - min) + min,
   map = (n, min1, max1, min2, max2) => lerp(norm(n, min1, max1), min2, max2),
   clamp = (n, from, to) => max(min(n, to), from),
-  rand = (min, max) => lerp(random(), min, max)
+  rand = (min, max) => floor(lerp(random(), min, max)),
+  fract = x => x % 1
 
 export const drawV = ([x, y], ctx, color = PRI) => {
   ctx.save()
@@ -58,6 +59,8 @@ export const arcMeasure = ([ox, oy], [x, y]) => {
     dy = y - oy
   return normalizeAngle(atan2(dy, dx))
 }
+
+export const arcV = (a, b) => acos(a.dot(b) / (a.mag * b.mag))
 
 export const joinV = ([x1, y1], [x2, y2], ctx, color, arrow = false) => {
   ctx.save()

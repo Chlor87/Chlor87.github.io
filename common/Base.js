@@ -15,8 +15,8 @@ export default class Base {
     const {canvas} = this
     this.W = document.documentElement.clientWidth
     this.H = document.documentElement.clientHeight
-    this.HW = round(this.W / 2)
-    this.HH = round(this.H / 2)
+    this.HW = this.W / 2
+    this.HH = this.H / 2
     this.UC = (1 / 2) * this.HH
     const {W, H} = this
     canvas.width = canvas.style.width = W
