@@ -1,7 +1,7 @@
 import {joinV, normalizeAngle, pointV} from '../common/utils.js'
 import V, {fromPolar} from '../common/V.js'
 
-const TURN = PI / (360 * 4),
+const TURN = PI / (360 * 3),
   listeners = {}
 
 export default class Particle extends V {
@@ -56,10 +56,10 @@ export default class Particle extends V {
       }
       switch (k) {
         case 'ArrowUp':
-          applyForce(5)
+          applyForce(this.map.tileSize.x / 3)
           break
         case 'ArrowDown':
-          applyForce(-5)
+          applyForce(-this.map.tileSize.x / 3)
           break
         case 'ArrowLeft':
           applyAngForce(TURN)
@@ -99,7 +99,7 @@ export default class Particle extends V {
     intY < nTiles - 1 && neighbors.push([intX, intY + 1])
 
     neighbors.forEach(([x, y]) => {
-      if (world[x + y * nTiles] !== 1) {
+      if (world[x + y * nTiles] === 0) {
         return
       }
       if (y === intY) {
@@ -133,7 +133,7 @@ export default class Particle extends V {
   draw(ctx) {
     this.update()
     const {r, color} = this
-    pointV(this, ctx, color, r)
+    pointV(this, ctx, color, 4)
     joinV(this, this.add(fromPolar(r + 7, this.dir)), ctx, color, true)
   }
 }

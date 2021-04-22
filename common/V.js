@@ -140,21 +140,10 @@ export default class V extends Float32Array {
     return cmp(this.mag, scalar) ? v : v.norm().mul(scalar)
   }
 
-  limitR(scalar) {
-    const v = vec(this)
-    return this.mag >= scalar ? v : v.norm().mul(scalar)
-  }
-
   static rand(minX, maxX, minY, maxY) {
     return new V(rand(minX, maxX), rand(minY, maxY))
   }
 
-  floor() {
-    const v = vec(this)
-    v.x = floor(v.x)
-    v.y = floor(v.y)
-    return v
-  }
 }
 
 const setBasicMath = () => {

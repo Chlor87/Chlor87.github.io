@@ -1,7 +1,7 @@
 import '../common/global.js'
 import Base from '../common/Base.js'
 import {BLACK, BLUE, GREEN, RED, SEC} from '../common/style.js'
-import {joinV} from '../common/utils.js'
+import {arcMeasure, joinV, pointV, rand} from '../common/utils.js'
 import {fromPolar, vec} from '../common/V.js'
 import Particle from './Particle.js'
 
@@ -11,16 +11,24 @@ const nTiles = 15
 const world = Array.from({length: nTiles ** 2}, (_, i, self) => {
     const [x, y] = getXY(i, nTiles)
     return x === 0 || x === nTiles - 1 || y === 0 || y === nTiles - 1
-      ? 1
-      : random() > 0.9
-      ? 1
+      ? (x + 1) % 2 === 0 || y % 2 !== 0
+        ? 1
+        : 2
+      : x % 2 === 0 && y % 2 !== 0
+      ? x % 4 === 0 || (y + 1) % 4 === 0
+        ? 1
+        : 2
       : 0
   }),
-  toIdx = ([x, y], nTiles) => floor(abs(x)) + floor(abs(y)) * nTiles
+  toIdx = ([x, y], nTiles) => floor(abs(x)) + floor(abs(y)) * nTiles,
+  colorMap = new Map([
+    [1, [RED, '#aa0000']],
+    [2, [GREEN, '#00aa00']]
+  ])
 
 class App extends Base {
   fov = 60
-  nRays = 240 * 2
+  nRays = 2
   constructor(canvas) {
     super(canvas)
     this.setupDimensions()
@@ -29,7 +37,7 @@ class App extends Base {
 
   setup() {
     this.setupDimensions()
-    const {H, HH, HW, W} = this,
+    const {ctx, H, HH, HW, W} = this,
       pos = vec(-HW, -HH / 2),
       size = vec(HH / 2, -HH / 2),
       center = pos.mul(2).add(size).div(2)
@@ -37,14 +45,20 @@ class App extends Base {
     this.map.tileSize = this.map.size.div(nTiles)
     this.map.screenSize = this.map.pos.add(this.map.size)
     this.p = new Particle({
-      pos: center,
-      r: 5,
+      pos: pos.add(vec(this.map.tileSize.x, this.map.tileSize.y).mul(1.5)),
+      dir: (3 * PI) / 2,
+      r: 1,
       mass: 75,
       color: GREEN,
       world,
       map: this.map
     })
+    this.nRays = this.W / 2
     this.p.bindCtrl()
+    this.sky = ctx.createLinearGradient(0, HH, 0, 0)
+    this.sky.addColorStop(0, '#004488')
+    this.sky.addColorStop(1, '#0099ff')
+    this.floor = '#222'
   }
 
   setupDimensions() {
@@ -66,7 +80,7 @@ class App extends Base {
         xx = pos.x + x * tileSize.x,
         yy = pos.y + y * tileSize.y
 
-      ctx.fillStyle = world[i] === 1 ? RED : BLUE
+      ctx.fillStyle = world[i] === 0 ? BLUE : colorMap.get(world[i])[0]
       ctx.fillRect(xx, yy, tileSize.x, tileSize.y)
       if (y === nTiles - 1) {
         joinV(vec(xx, pos.y), vec(xx, screenSize.y), ctx, SEC)
@@ -90,7 +104,7 @@ class App extends Base {
           pos: [mapX, mapY]
         }
       } = this,
-      theta = normalizeAngle(-dir - offset),
+      theta = normalizeAngle(-(dir + offset)),
       pos = vec(
         map(p.x, mapX, sizeX, 0, nTiles),
         map(p.y, mapY, sizeY, 0, nTiles)
@@ -113,21 +127,20 @@ class App extends Base {
       seenX = false,
       seenY = false,
       posX = pos.add(scaleX),
-      posY = pos.add(scaleY)
+      posY = pos.add(scaleY),
+      idxX = 0,
+      idxY = 0
 
     while (!((seenX && lenY >= lenX) || (seenY && lenX >= lenY))) {
-      if (
-        world[toIdx(vec(dirX === 1 ? posX.x : posX.x - 1, posX.y), nTiles)] ===
-        1
-      ) {
+      const x = toIdx(vec(dirX === 1 ? posX.x : posX.x - 1, posX.y), nTiles),
+        y = toIdx(vec(posY.x, dirY === 1 ? posY.y : posY.y - 1), nTiles)
+      if (world[x] !== 0) {
         seenX = true
+        idxX = x
       }
-
-      if (
-        world[toIdx(vec(posY.x, dirY === 1 ? posY.y : posY.y - 1), nTiles)] ===
-        1
-      ) {
+      if (world[y] !== 0) {
         seenY = true
+        idxY = y
       }
 
       if (!seenX && posX) {
@@ -141,31 +154,59 @@ class App extends Base {
     }
     const res = min(lenX, lenY)
 
-    return {dist: res, dir: res === lenX ? 0 : 1, offset}
+    return {
+      dist: res,
+      dir: res === lenX ? 0 : 1,
+      offset,
+      color: world[res === lenX ? idxX : idxY]
+    }
   }
 
   cast = () => {
-    const {nRays, fov} = this,
-      rays = []
+    const {
+        nRays,
+        fov: FOV,
+        p: {dir}
+      } = this,
+      rays = [],
+      fov = FOV.rad,
+      v1 = fromPolar(1, dir - fov / 2),
+      v2 = fromPolar(1, dir + fov / 2),
+      uv = fromPolar(magV(v1, v2) / FOV, arcMeasure(v1, v2))
 
-    for (let i = 0; i < nRays; i++) {
-      const offset = map(i, 0, nRays, -fov / 2, fov / 2).rad,
-        res = this.dda(offset)
-      rays.push(res)
+    for (let i = nRays; i > 0; i--) {
+      const v = v1.add(uv.mul(map(i, 0, nRays, 0, FOV)))
+      rays.push(this.dda(v.dir - dir))
     }
-    return rays.reverse()
+    return rays
   }
 
   drawRays = rays => {
     const {
-      ctx,
-      p,
-      map: {tileSize}
-    } = this
+        ctx,
+        p,
+        map: {tileSize}
+      } = this,
+      middleRay = rays[floor(rays.length / 2)],
+      grad = ctx.createLinearGradient(
+        p.x,
+        p.y,
+        ...p.add(fromPolar(middleRay.dist, p.dir).mul(tileSize.x))
+      )
+    grad.addColorStop(0, `rgba(255, 255, 255, .75)`)
+    grad.addColorStop(1, `rgba(255, 255, 255, .25)`)
+    ctx.save()
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.moveTo(p.x, p.y)
+
     for (let i = 0; i < rays.length; i++) {
       const {dist, offset} = rays[i]
-      joinV(p, p.add(fromPolar(dist, p.dir + offset).mul(tileSize.x)), ctx, SEC)
+      ctx.lineTo(...p.add(fromPolar(dist, p.dir + offset).mul(tileSize.x)))
     }
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
   }
 
   drawView = rays => {
@@ -173,20 +214,20 @@ class App extends Base {
       segW = W / nRays
 
     ctx.save()
-    ctx.fillStyle = '#0088ff'
+    ctx.fillStyle = this.sky
     ctx.fillRect(-HW, HH, W, -H)
-    ctx.fillStyle = '#222'
+    ctx.fillStyle = this.floor
     ctx.fillRect(-HW, 0, W, -HH)
 
     ctx.fillStyle = RED
 
     for (let i = 0; i < rays.length; i++) {
-      const {dist, dir, offset} = rays[i],
-        h = map(clamp(dist * cos(offset), 0, nTiles), 0, nTiles, H * .9, 0)
+      const {dist, dir, offset, color} = rays[i],
+        h = clamp(H / (dist * cos(offset)), 1, H - 1)
       if (h < 0) {
         return
       }
-      ctx.fillStyle = dir === 0 ? RED : '#aa0000'
+      ctx.fillStyle = colorMap.get(color)[dir]
       ctx.fillRect(-HW + i * segW, h / 2, segW + 1, -h)
     }
     ctx.restore()
