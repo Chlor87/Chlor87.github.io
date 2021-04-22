@@ -187,14 +187,14 @@ class App extends Base {
         p,
         map: {tileSize}
       } = this,
-      middleRay = rays[floor(rays.length / 2)],
+      longest = rays.reduce((p, {dist}) => max(p, dist), 0),
       grad = ctx.createLinearGradient(
         p.x,
         p.y,
-        ...p.add(fromPolar(middleRay.dist, p.dir).mul(tileSize.x))
+        ...p.add(fromPolar(longest, p.dir).mul(tileSize.x))
       )
     grad.addColorStop(0, `rgba(255, 255, 255, .75)`)
-    grad.addColorStop(1, `rgba(255, 255, 255, .25)`)
+    grad.addColorStop(1, `rgba(255, 255, 255, .5)`)
     ctx.save()
     ctx.fillStyle = grad
     ctx.beginPath()
