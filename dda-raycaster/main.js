@@ -5,7 +5,8 @@ import {arcMeasure, joinV, pointV, rand} from '../common/utils.js'
 import {fromPolar, vec} from '../common/V.js'
 import Particle from './Particle.js'
 
-const getXY = (i, a) => vec(i % a, floor(i / a))
+const getXY = (i, a) => vec(i % a, floor(i / a)),
+  DEG = PI / 180
 
 const nTiles = 15
 const world = Array.from({length: nTiles ** 2}, (_, i, self) => {
@@ -29,10 +30,27 @@ const world = Array.from({length: nTiles ** 2}, (_, i, self) => {
 class App extends Base {
   fov = 60
   nRays = 2
+  mouseX = 0
   constructor(canvas) {
     super(canvas)
     this.setupDimensions()
     this.setup()
+    canvas.addEventListener('click', () => {
+      canvas.requestPointerLock()
+    })
+    document.addEventListener('pointerlockchange', () => {
+      if (document.pointerLockElement === canvas) {
+        addEventListener('mousemove', this.handleMouse)
+      } else {
+        removeEventListener('mousemove', this.handleMouse)
+      }
+    })
+  }
+
+  handleMouse = ({movementX}) => {
+    const lim = this.HW / 10,
+      dir = map(clamp(movementX, -lim, lim), -lim, lim, DEG, -DEG)
+    this.p.applyAngForce(dir)
   }
 
   setup() {
@@ -233,8 +251,28 @@ class App extends Base {
     ctx.restore()
   }
 
+  drawCrosshair = () => {
+    const {ctx, HH} = this,
+      len = HH / 20
+    pointV(vec(0, 0), ctx, SEC, 2)
+    // joinV(vec(0, len), vec(0, -len), ctx, SEC, false, 2)
+    // joinV(vec(-len, 0), vec(len, 0), ctx, SEC, false, 2)
+  }
+
   draw = () => {
-    const {ctx, HW, HH, W, H, drawWorld, drawRays, drawView, cast, p} = this
+    const {
+      ctx,
+      HW,
+      HH,
+      W,
+      H,
+      drawWorld,
+      drawRays,
+      drawView,
+      cast,
+      drawCrosshair,
+      p
+    } = this
     ctx.fillRect(-HW, HH, W, -H)
     ctx.strokeStyle = SEC
     const rays = cast()
@@ -242,6 +280,7 @@ class App extends Base {
     drawWorld()
     drawRays(rays)
     p.draw(ctx)
+    drawCrosshair()
 
     requestAnimationFrame(this.draw)
   }

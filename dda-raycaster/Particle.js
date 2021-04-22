@@ -1,12 +1,13 @@
+import {SEC} from '../common/style.js'
 import {joinV, normalizeAngle, pointV} from '../common/utils.js'
-import V, {fromPolar} from '../common/V.js'
+import V, {fromPolar, vec} from '../common/V.js'
 
 const TURN = PI / (360 * 3),
   listeners = {}
 
 export default class Particle extends V {
-  acc = 0
-  vel = 0
+  acc = vec()
+  vel = vec()
 
   dirAcc = 0
   dirVel = 0
@@ -16,7 +17,11 @@ export default class Particle extends V {
     ArrowUp: false,
     ArrowDown: false,
     ArrowLeft: false,
-    ArrowRight: false
+    ArrowRight: false,
+    w: false,
+    s: false,
+    a: false,
+    d: false
   }
 
   constructor({pos, dir = pos.dir, r, mass, color, world, map}) {
@@ -45,7 +50,9 @@ export default class Particle extends V {
     addEventListener('keyup', handleKeyUp)
   }
 
-  applyForce = F => (this.acc += F / this.mass)
+  applyForce = F => {
+    this.acc = this.acc.add(F.div(this.mass)) /*  += F / this.mass */
+  }
   applyAngForce = F => (this.dirAcc += F)
 
   updateForces = () => {
@@ -56,16 +63,24 @@ export default class Particle extends V {
       }
       switch (k) {
         case 'ArrowUp':
-          applyForce(this.map.tileSize.x / 3)
+        case 'w':
+          applyForce(fromPolar(this.map.tileSize.x / 3, this.dir))
           break
         case 'ArrowDown':
-          applyForce(-this.map.tileSize.x / 3)
+        case 's':
+          applyForce(fromPolar(-this.map.tileSize.x / 3, this.dir))
           break
         case 'ArrowLeft':
           applyAngForce(TURN)
           break
         case 'ArrowRight':
           applyAngForce(-TURN)
+          break
+        case 'a':
+          applyForce(fromPolar(this.map.tileSize.x / 3, this.dir + PI / 2))
+          break
+        case 'd':
+          applyForce(fromPolar(this.map.tileSize.x / 3, this.dir - PI / 2))
           break
       }
     }
@@ -116,22 +131,23 @@ export default class Particle extends V {
     })
   }
 
-  update() {
+  update(ctx) {
     this.updateForces()
-    this.vel += this.acc
+    this.vel = this.vel.add(this.acc)
     this.dirVel += this.dirAcc
     this.dir = normalizeAngle(this.dir + this.dirVel)
-    this.set(this.add(fromPolar(this.vel, this.dir)))
+    this.set(this.add(this.vel))
+    // joinV(this, this.add(this.vel), ctx, SEC)
     this.collide()
 
-    this.acc = 0
+    this.acc = vec()
     this.dirAcc = 0
-    this.vel *= 0.9
+    this.vel = this.vel.mul(0.9)
     this.dirVel *= 0.9
   }
 
   draw(ctx) {
-    this.update()
+    this.update(ctx)
     const {r, color} = this
     pointV(this, ctx, color, 4)
     joinV(this, this.add(fromPolar(r + 7, this.dir)), ctx, color, true)
